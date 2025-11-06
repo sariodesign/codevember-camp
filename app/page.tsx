@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
+import LoginForm from "@/components/forms/LoginForm";
+import { SignupForm } from "@/components/forms/SignupForm";
 
 export default function Home() {
   return (
-   <Button> <p>ciao</p></Button> 
+    <SignupForm />
     
   );
 }
