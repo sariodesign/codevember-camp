@@ -1,9 +1,10 @@
-import LoginForm from "@/components/forms/LoginForm";
-import { SignupForm } from "@/components/forms/SignupForm";
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <SignupForm />
-    
+    <div className='w-full h-screen flex flex-col items-center justify-center gap-4'>
+      <Link href='/signup'>Registrati</Link>
+      <Link href='/login'>Accedi</Link>
+    </div>
   );
 }
