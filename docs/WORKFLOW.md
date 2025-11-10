@@ -98,22 +98,27 @@ feat(2): add a new productivity heatmap component that shows when you're most pr
 
 ## 🌿 Git Branch Conventions
 
+Utilizziamo le branch create dal ticket sul nostro github project
+
 ### Naming Convention
 ```
-<type>/<ticket-number>-<short-description>
+<ticket-number>-<type>---<short-description>
 ```
-
+✅ Esempi buoni
+```
+6-docs---team-workflow-conventions
+```
 ### Branch Types
 
 | Type | Uso | Esempio |
 |------|-----|---------|
-| `feature` | Nuove feature | `feature/45-calendar-integration` |
-| `bugfix` | Fix di bug | `bugfix/78-timezone-parsing` |
-| `hotfix` | Fix urgenti in produzione | `hotfix/99-critical-data-loss` |
-| `refactor` | Refactoring | `refactor/12-extract-mcp-logic` |
-| `docs` | Solo documentazione | `docs/update-setup-guide` |
-| `test` | Aggiunta/modifica test | `test/34-add-calendar-tests` |
-| `chore` | Maintenance, dipendenze | `chore/upgrade-dependencies` |
+| `feature` | Nuove feature | `45-feat---calendar-integration` |
+| `bugfix` | Fix di bug | `78-bugfix---timezone-parsing` |
+| `hotfix` | Fix urgenti in produzione | `99-hotfix---critical-data-loss` |
+| `refactor` | Refactoring | `12-refactor---extract-mcp-logic` |
+| `docs` | Solo documentazione | `24-docs---update-setup-guide` |
+| `test` | Aggiunta/modifica test | `34-test---add-calendar-tests` |
+| `chore` | Maintenance, dipendenze | `45-chore---upgrade-dependencies` |
 
 ### Branch Principali
 
@@ -129,24 +134,60 @@ feature/*, bugfix/*, etc.
 - **`develop`**: Integrazione continua, dove confluiscono tutte le feature
 - **`feature/*`**: Branching da `develop`, merge back a `develop`
 
+git checkout master
+git pull
+git checkout feat-branch
+git rebase master
+git push origin feat-branch
+si apre la pr
+
+sei in feat-branch
+git pull origin main --rebase
+git push origin main 
+
+### Git history strategy
+<div style="display:flex">
+<p>Non linear git history
+<img src="https://miro.medium.com/v2/resize:fit:1400/1*Ky1OaUBBMTKCHauOXlryQw.jpeg"/>
+</div>
+</div>
+
+#### Semi linear git history (WIP)
+
+
 ### Workflow
 
 1. **Crea branch da develop**
    ```bash
    git checkout develop
    git pull origin develop
-   git checkout -b feature/23-ai-chat-interface
+   git checkout -b 23-feat---ai-chat-interface
    ```
 
 2. **Lavora e committa**
    ```bash
    git add .
-   git commit -m "feat(chat): add message input component"
+   git commit -m "feat(4): add message input component"
    ```
 
-3. **Push e crea PR**
+3. **Rebase, Push e crea PR**
+   
+   rebase:
    ```bash
-   git push origin feature/23-ai-chat-interface
+   git checkout dev
+   git pull
+   git checkout 23-feat---ai-chat-interface
+   git rebase dev
+   ```
+   oppure
+
+   ```bash
+   git pull origin dev --rebase
+   ```
+
+   push:
+   ```bash
+   git push origin 23-feat---ai-chat-interface -f
    # Vai su GitHub e crea Pull Request verso develop
    ```
 
