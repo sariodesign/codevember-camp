@@ -15,7 +15,7 @@ import { useForm } from '@tanstack/react-form';
 import { Label } from '../ui/label';
 import Link from 'next/link';
 
-export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+export function SignupForm() {
   const form = useForm({
     defaultValues: {
       email: '',
