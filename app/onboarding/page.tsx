@@ -48,6 +48,16 @@ export default function Onboarding() {
     setStep(2);
   };
 
+    const handleProjectsSubmit = (value: any) => {
+    console.log("Projects:", value);
+    setUserOnboardingQuestions({
+      ...userOnboardingQuestions,
+      projects: {
+        projects: value,
+      },
+    });
+  };
+
   return (
     <div className='w-full h-screen flex flex-col items-center justify-center border-4 border-red-500'>
       {/* TODO: Progress bar */}
@@ -57,7 +67,8 @@ export default function Onboarding() {
         </CardHeader>
         <CardContent>
           {step === 1 && <FocusTimeForm onSubmit={handleFocusTimeSubmit} />}
-          {step === 2 && <ProjectsForm />}
+          
+          {step === 2 && <ProjectsForm onSubmit={handleProjectsSubmit} />}
         </CardContent>
         <CardFooter className='flex justify-end gap-2'>
           {step > 1 && (
