@@ -62,7 +62,7 @@ export const ProjectsForm = ({ onSubmit }: Props) => {
             validators={{
               onChange: ({ value }) => {
                 if (!value || value === "0") {
-                  return "A quanti progetti stai lavorando? è obbligatorio";
+                  return "Devi indicare almeno un progetto";
                 }
                 return undefined;
               },
@@ -109,15 +109,17 @@ export const ProjectsForm = ({ onSubmit }: Props) => {
                 <h3 className="font-semibold">Progetto {index + 1}</h3>
 
                 <div className="flex space-x-4">
-                  <form.Field name={`projects[${index}].name`}
-                  validators={{
-                    onChange: ({value}) => {
-                      if(!value?.trim()){
-                        return "Il nome del progetto è obbligatorio";
-                      }
-                      return undefined;
-                    }
-                  }}>
+                  <form.Field
+                    name={`projects[${index}].name`}
+                    validators={{
+                      onChange: ({ value }) => {
+                        if (!value?.trim()) {
+                          return "Il nome del progetto è obbligatorio";
+                        }
+                        return undefined;
+                      },
+                    }}
+                  >
                     {(field) => {
                       return (
                         <div className="space-y-2">

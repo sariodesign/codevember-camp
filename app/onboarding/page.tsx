@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import { FocusTimeForm } from '@/components/forms/FocusTimeForm';
-import { ProjectsForm } from '@/components/forms/ProjectsForm';
-import { Button } from '@/components/ui/button';
+import { FocusTimeForm } from "@/components/forms/FocusTimeForm";
+import { ProjectsForm } from "@/components/forms/ProjectsForm";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { useState } from 'react';
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
 
 interface UserOnboardingQuestions {
   focusTime: {
@@ -29,10 +30,10 @@ export default function Onboarding() {
   const [userOnboardingQuestions, setUserOnboardingQuestions] =
     useState<UserOnboardingQuestions>({
       focusTime: {
-        productiveTimeSlot: '',
-        focusTimeLength: '',
-        pauseTimeLength: '',
-        sessionsBeforeBreak: '',
+        productiveTimeSlot: "",
+        focusTimeLength: "",
+        pauseTimeLength: "",
+        sessionsBeforeBreak: "",
       },
       projects: {
         projects: [],
@@ -48,7 +49,7 @@ export default function Onboarding() {
     setStep(2);
   };
 
-    const handleProjectsSubmit = (value: any) => {
+  const handleProjectsSubmit = (value: any) => {
     console.log("Projects:", value);
     setUserOnboardingQuestions({
       ...userOnboardingQuestions,
@@ -59,20 +60,30 @@ export default function Onboarding() {
   };
 
   return (
-    <div className='w-full h-screen flex flex-col items-center justify-center border-4 border-red-500'>
-      {/* TODO: Progress bar */}
-      <Card className='w-full max-w-md'>
+    <div className="w-full h-screen flex flex-col items-center justify-center border-4 border-red-500">
+      <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Onboarding</CardTitle>
+          <CardTitle>
+            <div className="space-y-6 flex justify-between">
+              <h1 className="text-2xl font-bold">Onboarding</h1>
+              <div>
+                Step {step} di 2
+                <Progress
+                  className="max-w-2xs mx-auto mt-4"
+                  value={(step / 2) * 100}
+                />
+              </div>
+            </div>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {step === 1 && <FocusTimeForm onSubmit={handleFocusTimeSubmit} />}
-          
+
           {step === 2 && <ProjectsForm onSubmit={handleProjectsSubmit} />}
         </CardContent>
-        <CardFooter className='flex justify-end gap-2'>
+        <CardFooter className="flex justify-end gap-2">
           {step > 1 && (
-            <Button onClick={() => setStep(step - 1)} variant='outline'>
+            <Button onClick={() => setStep(step - 1)} variant="outline">
               Indietro
             </Button>
           )}

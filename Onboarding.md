@@ -10,6 +10,11 @@ COSA STAI LAVORANDO
 Contesto professionale:
 
 Qual è il tuo ruolo principale? (Studente / Freelance / Dipendente / Imprenditore / Altro)
+
+A quanti progetti stai lavorando?
+
+Nome, descrizione e scadenza del progetto.
+
 Su quanti progetti lavori tipicamente in parallelo? (1 / 2-3 / 4-5 / Più di 5)
 Quali sono le tue 2-3 priorità principali in questo momento? (Campo aperto)
 
