@@ -13,10 +13,10 @@ export default async function TestLogin() {
     redirect("/login")
   }
 
-    return (
-        <div>sono loggato!
+  return (
+    <div>sono loggato!
 
-            <Button onClick={logout}>Logout</Button>
-        </div>
-    )
+      <Button onClick={logout}>Logout</Button>
+    </div>
+  )
 }

@@ -9,7 +9,6 @@ export default async function LoginPage() {
     redirect("/test-login")
   }
 
-
   return (
     <div className="w-full h-screen flex">
       <LoginForm />
