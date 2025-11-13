@@ -8,7 +8,7 @@ export default async function LoginPage() {
   if (data.session) {
     redirect("/test-login")
   }
-  
+
 
   return (
     <div className="w-full h-screen flex">
