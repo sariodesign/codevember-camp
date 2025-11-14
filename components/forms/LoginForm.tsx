@@ -15,8 +15,11 @@ import { login } from "@/app/actions/login";
 import Link from "next/dist/client/link";
 import { Label } from "../ui/label";
 import { GoogleIcon } from "../icons/GoogleIcon";
+import { createClient } from "@/utils/supabase/client";
 
 export default function LoginForm() {
+  const supabase = createClient()
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -130,8 +133,8 @@ export default function LoginForm() {
           </form.Field>
 
           <Button type="submit" className="w-full">
-          Accedi
-        </Button>
+            Accedi
+          </Button>
         </form>
       </CardContent>
       <CardFooter className="flex-col gap-2">
@@ -139,10 +142,23 @@ export default function LoginForm() {
           Crea un nuovo account
         </Button>
         <p className="text-sm font-semibold mt-4">Oppure continua con</p>
-        <Button className="w-full">
+        <Button className="w-full" onClick={async () => await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `http://localhost:3000/auth/callback`,
+            scopes: "https://www.googleapis.com/auth/calendar",
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            }
+          }
+        })}>
           <GoogleIcon />
           Google
         </Button>
+        <p className="text-sm">
+          Non hai un account? <Link href="/signup">Registrati</Link>
+        </p>
       </CardFooter>
     </Card>
   );
@@ -150,16 +166,16 @@ export default function LoginForm() {
 
 
 <CardFooter className="flex-col gap-2">
-        <Button type="submit" className="w-full">
-          Accedi
-        </Button>
+  <Button type="submit" className="w-full">
+    Accedi
+  </Button>
 
-        <Button variant="outline" className="w-full">
-          Crea un nuovo account
-        </Button>
-        <p className="text-sm font-semibold mt-4">Oppure continua con</p>
-        <Button className="w-full">
-          <GoogleIcon />
-          Google
-        </Button>
-      </CardFooter>
+  <Button variant="outline" className="w-full">
+    Crea un nuovo account
+  </Button>
+  <p className="text-sm font-semibold mt-4">Oppure continua con</p>
+  <Button className="w-full">
+    <GoogleIcon />
+    Google
+  </Button>
+</CardFooter>
