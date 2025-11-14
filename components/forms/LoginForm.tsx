@@ -14,6 +14,7 @@ import { Button } from "../ui/button";
 import { login } from "@/app/actions/login";
 import Link from "next/dist/client/link";
 import { Label } from "../ui/label";
+import { GoogleIcon } from "../icons/GoogleIcon";
 
 export default function LoginForm() {
   const form = useForm({
@@ -129,15 +130,36 @@ export default function LoginForm() {
           </form.Field>
 
           <Button type="submit" className="w-full">
-            Accedi
-          </Button>
+          Accedi
+        </Button>
         </form>
       </CardContent>
       <CardFooter className="flex-col gap-2">
-        <p className="text-sm">
-          Non hai un account? <Link href="/signup">Registrati</Link>
-        </p>
+        <Button variant="outline" className="w-full">
+          Crea un nuovo account
+        </Button>
+        <p className="text-sm font-semibold mt-4">Oppure continua con</p>
+        <Button className="w-full">
+          <GoogleIcon />
+          Google
+        </Button>
       </CardFooter>
     </Card>
   );
 }
+
+
+<CardFooter className="flex-col gap-2">
+        <Button type="submit" className="w-full">
+          Accedi
+        </Button>
+
+        <Button variant="outline" className="w-full">
+          Crea un nuovo account
+        </Button>
+        <p className="text-sm font-semibold mt-4">Oppure continua con</p>
+        <Button className="w-full">
+          <GoogleIcon />
+          Google
+        </Button>
+      </CardFooter>
