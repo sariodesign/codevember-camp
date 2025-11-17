@@ -14,30 +14,8 @@ export async function GET(request: Request) {
 
     if (code) {
         const supabase = await createClient()
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-        const providerToken = data.session?.provider_token;
-        const refreshToken = data.session?.refresh_token;
-        console.log({
-            providerToken,
-            refreshToken
-        })
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
 
-        const response = await fetch(
-            `https://www.googleapis.com/calendar/v3/calendars/primary/events`,
-            {
-                headers: {
-                    "Authorization": `Bearer ${providerToken}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-
-        // ✅ SE IL TOKEN È SCADUTO, PROVA A RINNOVARE LA SESSIONE
-        if (response.status === 401) {
-            throw new Error("Token scaduto, necessario nuovo login");
-        }
-
-        console.log(response);
 
         if (!error) {
             const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer

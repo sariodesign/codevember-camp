@@ -32,7 +32,6 @@ export const ProjectsForm = ({ onSubmit }: Props) => {
     },
     onSubmit: async ({ value }) => {
       onSubmit(value.projects);
-      console.log("Submitting projects:", value.projects);
     },
   });
 

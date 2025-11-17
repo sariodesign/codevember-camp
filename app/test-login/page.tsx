@@ -1,15 +1,15 @@
 import { redirect } from "next/dist/client/components/navigation"
-import { checkSession } from "../actions/checkSession"
 import { logout } from "../actions/logout"
 import { Button } from "@/components/ui/button"
+import { getCurrentUser } from "../actions/getCurrentUser"
 
 
 
 export default async function TestLogin() {
 
-  const { data } = await checkSession()
+  const { data } = await getCurrentUser()
 
-  if (!data.session) {
+  if (!data.user) {
     redirect("/login")
   }
 

@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "@tanstack/react-form";
 import { Label } from "../ui/label";
 import Link from "next/link";
+import { signUp } from "@/app/actions/signUp";
 
 export function SignupForm() {
   const form = useForm({
@@ -23,7 +24,10 @@ export function SignupForm() {
     },
     onSubmit: async ({ value }) => {
       // Do something with form data
-      console.log(value);
+      const formData = new FormData();
+      formData.append("email", value.email);
+      formData.append("password", value.password);
+      await signUp(formData)
     },
   });
 

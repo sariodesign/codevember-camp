@@ -2,14 +2,14 @@
 
 
 import { redirect } from "next/navigation";
-import { checkSession } from "./checkSession"
 import { createClient } from "@/utils/supabase/server";
+import { getCurrentUser } from "./getCurrentUser";
 
 export const login = async (formData: FormData) => {
-    const { data } = await checkSession();
+    const { data } = await getCurrentUser();
 
-    if (data.session) {
-        redirect('/onboarding')
+    if (data.user) {
+        redirect('/test-login')
     }
 
     const supabase = await createClient()
@@ -24,8 +24,8 @@ export const login = async (formData: FormData) => {
     if (error) {
         redirect("/error")
     } else {
-        if (data.session) {
-            redirect("/onboarding")
+        if (data.user) {
+            redirect("/test-login")
         }
     }
 }
