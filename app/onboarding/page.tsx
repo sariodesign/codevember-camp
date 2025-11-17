@@ -41,7 +41,6 @@ export default function Onboarding() {
     });
 
   const handleFocusTimeSubmit = (value: any) => {
-    console.log(value);
     setUserOnboardingQuestions({
       ...userOnboardingQuestions,
       focusTime: value,
@@ -50,7 +49,6 @@ export default function Onboarding() {
   };
 
   const handleProjectsSubmit = (value: any) => {
-    console.log("Projects:", value);
     setUserOnboardingQuestions({
       ...userOnboardingQuestions,
       projects: {
