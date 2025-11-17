@@ -6,7 +6,7 @@ export default async function Home() {
   const { data } = await getCurrentUser()
 
   if (data.user) {
-    redirect("/test-login")
+    redirect("/dashboard")
   }
 
   return (
