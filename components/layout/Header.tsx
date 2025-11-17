@@ -31,6 +31,7 @@ export default function Header({
       <div>
         {user && (
           <div className="flex items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={user.user_metadata.avatar_url}
               alt="Avatar"
