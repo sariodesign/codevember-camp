@@ -59,7 +59,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-center border-4 border-red-500">
+    <div className="w-full h-screen flex flex-col items-center justify-center ">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>
