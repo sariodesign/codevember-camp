@@ -1,6 +1,6 @@
 const LLM_MODEL = "llama3.1:8b";
 const SYSTEM_PROMPT = `You are a helpful assistant. Answer user questions directly and naturally.
-              IMPORTANT: Only use the getCurrentTime tool if the user explicitly asks for the current time, time-related information. In all other cases, answer the question without using any tools.
+              IMPORTANT: Only use the getCurrentTime tool if the user explicitly asks for the current time, time-related information. Use getAllTheEvents if the user explicitly asks for event-related information. In all other cases, answer the question without using any tools.
 
               When you DO use a tool:
               1. Call the tool only when necessary
