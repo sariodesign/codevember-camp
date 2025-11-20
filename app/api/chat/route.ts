@@ -61,7 +61,6 @@ export async function POST(req: Request) {
             .object({ timeZone: z.string() })
             .describe("The IANA time zone name, e.g., 'America/New_York'."),
           execute: async ({ timeZone }: { timeZone: string }) => {
-            console.log("getCurrentTime called with timeZone:", timeZone);
             if (!isTimeZoneValue(timeZone)) {
               return "The timezone is not valid. I want a format like this: America/New_York";
             }
