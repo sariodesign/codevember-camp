@@ -14,6 +14,23 @@ export default function Chat() {
     messagesEndRef,
   } = useChatLogic();
 
+  const ToolMessage = ({
+    toolName,
+    output,
+  }: {
+    toolName: string;
+    output: string;
+  }) => (
+    <div className="flex justify-start">
+      <div className="max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-relaxed shadow-sm bg-yellow-300 text-slate-900">
+        <span className="block text-xs font-semibold uppercase tracking-wide opacity-70">
+          Tool [{toolName}] response
+        </span>
+        {output?.trim() || "..."}
+      </div>
+    </div>
+  );
+
   return (
     <>
       <style>{`F
@@ -88,49 +105,32 @@ export default function Chat() {
                       );
                     }
 
-                    case "tool-getCurrentTime": {
-                      const textContentTool: string = part.output
-                        ? part.output.toString()
-                        : "";
-
+                    case "tool-getCurrentTime":
                       return (
-                        <div key={message.id} className={`flex justify-start`}>
-                          <div
-                            className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-relaxed shadow-sm bg-yellow-300 text-slate-900`}
-                          >
-                            <span className="block text-xs font-semibold uppercase tracking-wide opacity-70">
-                              {"Tool response"}
-                            </span>
-                            {textContentTool &&
-                            textContentTool.trim().length > 0
-                              ? textContentTool
-                              : "..."}
-                          </div>
-                        </div>
+                        <ToolMessage
+                          key={message.id}
+                          toolName="getCurrentTime"
+                          output={part.output?.toString() || ""}
+                        />
                       );
-                    }
 
-                    case "tool-getAllTheEvents": {
-                      const textContentTool: string = part.output
-                        ? part.output.toString()
-                        : "";
-
+                    case "tool-getAllTheEvents":
                       return (
-                        <div key={message.id} className={`flex justify-start`}>
-                          <div
-                            className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-relaxed shadow-sm bg-yellow-300 text-slate-900`}
-                          >
-                            <span className="block text-xs font-semibold uppercase tracking-wide opacity-70">
-                              {"Tool [getAllTheEvents] response"}
-                            </span>
-                            {textContentTool &&
-                            textContentTool.trim().length > 0
-                              ? textContentTool
-                              : "..."}
-                          </div>
-                        </div>
+                        <ToolMessage
+                          key={message.id}
+                          toolName="getAllTheEvents"
+                          output={part.output?.toString() || ""}
+                        />
                       );
-                    }
+
+                    case "tool-getUserInfoPrompt":
+                      return (
+                        <ToolMessage
+                          key={message.id}
+                          toolName="getUserInfoPrompt"
+                          output={part.output?.toString() || ""}
+                        />
+                      );
 
                     default:
                       return null;
