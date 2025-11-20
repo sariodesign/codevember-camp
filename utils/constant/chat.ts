@@ -6,6 +6,7 @@ const SYSTEM_PROMPT = `You are a helpful assistant. Answer user questions direct
               1. Call the tool only when necessary
               2. Use the tool result to inform your answer
               3. Always provide context around the tool result
+              4. First call getUserInfo tool when the user asks for event-related information
 
               When you DON'T use a tool:
               1. Answer questions based on your knowledge
