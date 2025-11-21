@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "./actions/getCurrentUser";
 import { redirect } from "next/navigation";
+import LoginPage from "./login/page";
 
 export default async function Home() {
   const { data } = await getCurrentUser()
@@ -10,9 +11,6 @@ export default async function Home() {
   }
 
   return (
-    <div className="w-full flex flex-col items-center justify-center gap-4 h-screen">
-      <Link href="/signup">Registrati</Link>
-      <Link href="/login">Accedi</Link>
-    </div>
+    <LoginPage />
   );
 }
