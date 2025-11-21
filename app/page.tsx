@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getCurrentUser } from "./actions/getCurrentUser";
 import { redirect } from "next/navigation";
 import LoginPage from "./login/page";

@@ -3,41 +3,42 @@
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarEvent } from "@/types/event";
 import React from "react";
+import { getCalendarEvents } from "../actions/getCalendarEvents";
+
+
+
 
 export default function Dashboard() {
 
   const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const [events, setEvents] = React.useState<CalendarEvent[]>([])
+  const [loading, setLoading] = React.useState<boolean>(true);
 
-  const [events, setEvents] = React.useState<CalendarEvent[]>([
-  {
-    id: "1",
-    summary: "Riunione team",
-    description: "Discussione sul progetto",
-    start: { date: "2025-11-18" },
-    end: { date: "2025-11-18" },
-  },
-  {
-    id: "2",
-    summary: "Deadline",
-    description: "Consegna primo sprint",
-    start: { date: "2025-11-20" },
-    end: { date: "2025-11-20" },
-  },
-]);
+  React.useEffect(() => { 
+    const fetchEvents = async () => {
+      try {
+        const data = await getCalendarEvents();
+        console.log("Eventi da google:", data)
+        setEvents(data || []);
+      } catch (error) {
+        console.error("Errore nel recupero degli eventi del calendario:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []); 
+
+  if (loading) {
+    return <div className="p-6">Caricamento eventi del calendario...</div>;
+  }
 
 const eventsForSelectedDate = events.filter(event => {
-  if (!date || !event.start?.date) return false;
-  const eventDate = new Date(event.start.date);
+  if (!date || !event.start?.dateTime) return false;
+  const eventDate = new Date(event.start.dateTime);
   return eventDate.toDateString() === date.toDateString();
 })
-
-const hasEvents = (checkDate: Date) => {
-  return events.some(event => {
-    if(!event.start?.date) return false;
-    const eventDate = new Date(event.start.date);
-    return eventDate.toDateString() === checkDate.toDateString();
-  });
-}
 
   return (
     <div className="p-6">
