@@ -2,18 +2,8 @@ import type { Database } from '@/utils/supabase/database.types';
 
 type ProfileDb = Database['public']['Tables']['profiles']['Row'];
 
-export interface ProfileDto {
-    id: string;
-    email: string;
-    fullName: string | null;
-    avatarUrl: string | null;
-    timezone: string;
-    createdAt: string;
-    updatedAt: string | null;
-}
-
 export interface ProfilePageDto {
-    profile: ProfileDto;
+    profile: ProfileDb;
     stats: {
         isComplete: boolean;
         memberSince: string;
@@ -22,35 +12,23 @@ export interface ProfilePageDto {
 
 export interface ProfileUpdateResponseDto {
     success: boolean;
-    profile: ProfileDto;
+    profile: ProfileDb;
     message?: string;
 }
 
-export function toProfileDto(profileDb: ProfileDb): ProfileDto {
-    return {
-        id: profileDb.id,
-        email: profileDb.email,
-        fullName: profileDb.full_name,
-        avatarUrl: profileDb.avatar_url,
-        timezone: profileDb.timezone ?? 'Europe/Rome',
-        createdAt: profileDb.created_at ?? new Date().toISOString(),
-        updatedAt: profileDb.updated_at,
-    };
-}
-
 export function toProfilePageDto(profileDb: ProfileDb): ProfilePageDto {
-    const profile = toProfileDto(profileDb);
 
-    const createdDate = new Date(profile.createdAt);
+
+    const createdDate = new Date(profileDb.created_at || new Date());
     const memberSince = createdDate.toLocaleDateString('it-IT', {
         year: 'numeric',
         month: 'long',
     });
 
     return {
-        profile,
+        profile: profileDb,
         stats: {
-            isComplete: !!(profile.fullName && profile.timezone !== 'Europe/Rome'),
+            isComplete: !!(profileDb.full_name && profileDb.timezone !== 'Europe/Rome'),
             memberSince,
         },
     };
@@ -62,7 +40,7 @@ export function toProfileUpdateResponse(
 ): ProfileUpdateResponseDto {
     return {
         success: true,
-        profile: toProfileDto(profileDb),
+        profile: profileDb,
         message,
     };
 }

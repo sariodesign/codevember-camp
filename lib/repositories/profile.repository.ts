@@ -4,6 +4,14 @@ import type { Database } from '@/utils/supabase/database.types';
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 // type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
+type UserPreferences = Database['public']['Tables']['user_preferences']['Row'];
+
+/**
+ * Tipo di ritorno per query con join
+ */
+export type ProfileWithPreferences = Profile & {
+    user_preferences: UserPreferences | null;
+};
 
 export async function findProfileById(
     supabase: SupabaseClient<Database>,
