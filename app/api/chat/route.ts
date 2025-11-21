@@ -3,11 +3,14 @@ import { convertToModelMessages, stepCountIs, streamText, UIMessage } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { LLM_MODEL, SYSTEM_PROMPT } from "@/utils/constant/chat";
-import { isTimeZoneValue } from "@/utils/shared";
+import { createPromptFromUserInfo, isTimeZoneValue } from "@/utils/shared";
 import { createClient } from "@/utils/supabase/server";
 import { CalendarEvent } from "@/types/event";
 import { GETEvents } from "@/network/google_calendar";
-import { UserInfo } from "@/types/userInfos";
+import {
+  findUserPreferencesByUserId,
+  UserPreferences,
+} from "@/lib/repositories/user_preferences";
 
 export const runtime = "nodejs";
 
@@ -32,27 +35,34 @@ export async function POST(req: Request) {
           inputSchema: z.object().describe("No input needed."),
           outputSchema: z.string().describe("The user information prompt."),
           execute: async () => {
-            const { data, error } = await supabase.auth.getUser();
+            try {
+              const { data, error } = await supabase.auth.getUser();
 
-            if (error) {
-              throw new Error("Impossible to get session");
+              if (error) {
+                throw new Error("Impossible to get session");
+              }
+
+              const userId = data.user?.id;
+
+              const userInfo = await findUserPreferencesByUserId(
+                supabase,
+                userId!
+              );
+
+              if (!userInfo) {
+                throw new Error("User info not found");
+              }
+
+              const prompt = createPromptFromUserInfo(
+                userInfo as UserPreferences
+              );
+
+              return prompt;
+            } catch (err) {
+              return `Error retrieving user info: ${
+                err instanceof Error ? err.message : String(err)
+              }`;
             }
-
-            const userId = data.user?.id;
-
-            const { data: userInfo } = await supabase
-              .from("onboardings")
-              .select()
-              .eq("user_id", userId)
-              .single();
-
-            if (!userInfo) {
-              throw new Error("User info not found");
-            }
-
-            const prompt = createPromptFromUserInfo(userInfo as UserInfo);
-
-            return prompt;
           },
         },
         getCurrentTime: {
@@ -126,38 +136,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
-
-function createPromptFromUserInfo(userInfo: UserInfo): string {
-  const prompt = `You are assisting a user with their calendar and scheduling needs. Here is their configuration:
-
-User Preferences:
-- Productive Hours: ${userInfo.productive_hours_start} to ${
-    userInfo.productive_hours_end
-  }
-  (The user is most productive during these hours and prefers important tasks scheduled within this window)
-- Focus Session Duration: ${userInfo.focus_session_duration} minutes
-  (Preferred length for deep work sessions without interruptions)
-- Preferred Meeting Duration: ${userInfo.preferred_meeting_duration} minutes
-  (Default length for scheduled meetings)
-- Auto Schedule Focus Sessions: ${
-    userInfo.auto_schedule_focus_sessions ? "Enabled" : "Disabled"
-  }
-  (${
-    userInfo.auto_schedule_focus_sessions
-      ? "Automatically create focus blocks in the calendar"
-      : "Manual focus session scheduling required"
-  })
-
-When providing scheduling suggestions or analyzing the calendar:
-- Respect the productive hours window for focus-intensive tasks
-- Consider the user's preferred durations when suggesting new events
-- ${
-    userInfo.auto_schedule_focus_sessions
-      ? "Suggest available slots for focus sessions"
-      : "Ask before scheduling focus sessions"
-  }
-- Avoid scheduling back-to-back meetings when possible`;
-
-  return prompt;
 }
