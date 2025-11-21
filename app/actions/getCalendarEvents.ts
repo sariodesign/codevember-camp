@@ -26,7 +26,7 @@ const params = new URLSearchParams({
   orderBy: 'startTime',
 });
 
-    if (!session?.access_token){
+    if (!session?.provider_token){
       throw new Error("Token not available");
     }
 
@@ -38,8 +38,7 @@ const params = new URLSearchParams({
     });
 
     const data = await response.json();
-    console.log(data.items)
-
+    console.log(data)
     // Mappatura degli eventi nel formato CalendarEvent
 
 const mappedEvents = data.items.map((event: CalendarEvent) => ({
