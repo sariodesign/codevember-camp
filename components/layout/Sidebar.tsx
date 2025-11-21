@@ -3,6 +3,7 @@
 import React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
+import ChatPage from "@/app/chat/page";
 
 export default function Sidebar() {
   return (
@@ -23,7 +24,7 @@ export default function Sidebar() {
           </DialogDescription>
         </DialogHeader>
 
-          {/* Qui ci mettiamo il contenuto della chat */}
+          <ChatPage />
 
       </DialogContent>
     </Dialog>

@@ -22,6 +22,7 @@ export default function Header({
   const [open, setOpen] = useState(false);
 
 
+
   return (
     <header className="w-full border-b bg-muted flex justify-between items-center p-4">
       <div>
@@ -38,6 +39,7 @@ export default function Header({
               width={40}
               height={40}
               className="rounded-full mr-4"
+
             />
 
             <DropdownMenu open={open} onOpenChange={setOpen}>
