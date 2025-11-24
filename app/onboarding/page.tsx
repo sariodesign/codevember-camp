@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
+import { FocusTime, Project } from "@/types/shared";
 
 interface UserOnboardingQuestions {
   focusTime: {
@@ -21,7 +22,7 @@ interface UserOnboardingQuestions {
     sessionsBeforeBreak: string;
   };
   projects: {
-    projects: string[];
+    projects: Project[];
   };
 }
 
@@ -40,7 +41,7 @@ export default function Onboarding() {
       },
     });
 
-  const handleFocusTimeSubmit = (value: any) => {
+  const handleFocusTimeSubmit = (value: FocusTime) => {
     setUserOnboardingQuestions({
       ...userOnboardingQuestions,
       focusTime: value,
@@ -48,7 +49,7 @@ export default function Onboarding() {
     setStep(2);
   };
 
-  const handleProjectsSubmit = (value: any) => {
+  const handleProjectsSubmit = (value: Project[]) => {
     setUserOnboardingQuestions({
       ...userOnboardingQuestions,
       projects: {
@@ -58,7 +59,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-center border-4 border-red-500">
+    <div className="w-full h-screen flex flex-col items-center justify-center ">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>
@@ -75,9 +76,19 @@ export default function Onboarding() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {step === 1 && <FocusTimeForm onSubmit={handleFocusTimeSubmit} />}
+          {step === 1 && (
+            <FocusTimeForm
+              onSubmit={handleFocusTimeSubmit}
+              defaultValues={userOnboardingQuestions.focusTime}
+            />
+          )}
 
-          {step === 2 && <ProjectsForm onSubmit={handleProjectsSubmit} />}
+          {step === 2 && (
+            <ProjectsForm
+              onSubmit={handleProjectsSubmit}
+              defaultValues={userOnboardingQuestions.projects.projects}
+            />
+          )}
         </CardContent>
         <CardFooter className="flex justify-end gap-2">
           {step > 1 && (

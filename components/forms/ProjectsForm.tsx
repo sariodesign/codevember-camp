@@ -20,15 +20,16 @@ type Project = {
 
 interface Props {
   onSubmit: (value: Project[]) => void;
+  defaultValues?: Project[];
 }
 
-export const ProjectsForm = ({ onSubmit }: Props) => {
+export const ProjectsForm = ({ onSubmit, defaultValues }: Props) => {
   const [projectForms, setProjectForms] = useState(0);
 
   const form = useForm({
     defaultValues: {
-      projectsNum: "0",
-      projects: [] as Project[],
+      projectForms: projectForms.toString().length, 
+      projects: defaultValues ?? [] as Project[],
     },
     onSubmit: async ({ value }) => {
       onSubmit(value.projects);
@@ -41,7 +42,7 @@ export const ProjectsForm = ({ onSubmit }: Props) => {
       name: "",
       priority: "",
     }));
-    form.setFieldValue("projectsNum", value);
+    form.setFieldValue("projectForms", value);
     form.setFieldValue("projects", newProjects);
     setProjectForms((prev) => prev + 1);
   };
@@ -112,7 +113,7 @@ export const ProjectsForm = ({ onSubmit }: Props) => {
                     name={`projects[${index}].name`}
                     validators={{
                       onChange: ({ value }) => {
-                        if (!value?.trim()) {
+                        if (!(value as string)?.trim()) {
                           return "Il nome del progetto è obbligatorio";
                         }
                         return undefined;
@@ -129,7 +130,7 @@ export const ProjectsForm = ({ onSubmit }: Props) => {
                             id={`name-${index}`}
                             type="text"
                             placeholder="Es. Progetto A"
-                            value={field.state.value}
+                            value={field.state.value as string}
                             onChange={(e) => field.handleChange(e.target.value)}
                           />
                         </div>
