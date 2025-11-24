@@ -132,6 +132,15 @@ export default function Chat() {
                         />
                       );
 
+                    case "tool-addGoogleCalendarEvent":
+                      return (
+                        <ToolMessage
+                          key={message.id}
+                          toolName="addGoogleCalendarEvent"
+                          output={part.output?.toString() || ""}
+                        />
+                      );
+
                     default:
                       return null;
                   }
