@@ -2,6 +2,7 @@
 
 import { CalendarEvent } from "@/types/event";
 import { BASE_CALENDAR_URL } from "@/utils/constant/api_url";
+import { mapGoogleCalendarEvents } from "@/utils/mappers/mapGoogleCalendarEvents";
 import { createClient } from "@/utils/supabase/server";
 
 
@@ -37,16 +38,7 @@ const params = new URLSearchParams({
       },
     });
 
-    const data = await response.json();
-    console.log(data)
-    // Mappatura degli eventi nel formato CalendarEvent
-
-const mappedEvents = data.items.map((event: CalendarEvent) => ({
-  id: event.id,
-  summary: event.summary,
-  description: event.location || "",
-  start: { dateTime: event.start?.dateTime },
-  end: { dateTime: event.end?.dateTime }
-}));
+const data = await response.json();
+const mappedEvents = mapGoogleCalendarEvents(data.items);
 return mappedEvents;
   }
