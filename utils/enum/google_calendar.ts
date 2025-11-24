@@ -3,3 +3,7 @@ export enum GoogleCalendarSendUpdates {
   ExternalOnly = "externalOnly",
   None = "none",
 }
+
+export enum GoogleCalendarType {
+  Primary = "primary",
+}

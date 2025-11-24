@@ -1,12 +1,15 @@
 import { CalendarEvent } from "@/types/event";
 import { BASE_CALENDAR_URL } from "@/utils/constant/api_url";
-import { GoogleCalendarSendUpdates } from "@/utils/enum/google_calendar";
+import {
+  GoogleCalendarSendUpdates,
+  GoogleCalendarType,
+} from "@/utils/enum/google_calendar";
 
 //TODO: change the function so it can be more generic
 async function GETEvents(
   token: string,
   params?: URLSearchParams,
-  calendarId: string = "primary"
+  calendarId: string = GoogleCalendarType.Primary
 ): Promise<Response> {
   //     const startOfMonth = new Date();
   // startOfMonth.setDate(1);
@@ -48,7 +51,7 @@ async function GETEvents(
 async function INSERTEvent(
   token: string,
   event: CalendarEvent,
-  calendarId: string = "primary",
+  calendarId: string = GoogleCalendarType.Primary,
   sendUpdates:
     | GoogleCalendarSendUpdates.All
     | GoogleCalendarSendUpdates.ExternalOnly
