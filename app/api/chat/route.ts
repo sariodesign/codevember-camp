@@ -6,7 +6,7 @@ import { LLM_MODEL, SYSTEM_PROMPT } from "@/utils/constant/chat";
 import { createPromptFromUserInfo, isTimeZoneValue } from "@/utils/shared";
 import { createClient } from "@/utils/supabase/server";
 import { CalendarEvent } from "@/types/event";
-import { GETEvents } from "@/network/google_calendar";
+import { GETEvents, INSERTEvent } from "@/network/google_calendar";
 import {
   findUserPreferencesByUserId,
   UserPreferences,
@@ -65,6 +65,98 @@ export async function POST(req: Request) {
             }
           },
         },
+        addGoogleCalendarEvent: {
+          description: "Adds a new event to the user's Google Calendar.",
+          inputSchema: z.object({
+            summary: z
+              .string()
+              .optional()
+              .describe("The summary or title of the event."),
+            description: z
+              .string()
+              .optional()
+              .describe("The description of the event."),
+            location: z
+              .string()
+              .optional()
+              .describe("The location of the event."),
+            startDateTime: z
+              .string()
+              .describe(
+                "The start date and time in ISO format, e.g., '2025-11-22T10:00:00+01:00'."
+              ),
+            endDateTime: z
+              .string()
+              .describe(
+                "The end date and time in ISO format, e.g., '2025-11-22T11:00:00+01:00'."
+              ),
+            timeZone: z
+              .string()
+              .optional()
+              .describe("The IANA time zone name, e.g., 'America/New_York'."),
+          }),
+          execute: async ({
+            summary,
+            description,
+            location,
+            startDateTime,
+            endDateTime,
+            timeZone,
+          }: {
+            summary?: string;
+            description?: string;
+            location?: string;
+            startDateTime: string;
+            endDateTime: string;
+            timeZone?: string;
+          }) => {
+            try {
+              const { data, error } = await supabase.auth.getSession();
+
+              if (error) {
+                throw new Error("Impossible to get session");
+              }
+
+              const providerToken = data.session?.provider_token;
+
+              if (!providerToken) {
+                throw new Error("No provider token available");
+              }
+
+              const response: Response = await INSERTEvent(providerToken, {
+                summary,
+                description,
+                location,
+                start: {
+                  dateTime: startDateTime,
+                  timeZone: timeZone,
+                },
+                end: {
+                  dateTime: endDateTime,
+                  timeZone: timeZone,
+                },
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                console.error(
+                  "Error response from Google Calendar API:",
+                  errorData
+                );
+                return `Failed to add event: ${
+                  errorData.error?.message ?? "Unknown error"
+                }`;
+              }
+
+              return "Event added successfully to your Google Calendar.";
+            } catch (err) {
+              console.error("Unexpected error in addGoogleCalendarEvent:", err);
+              return `Error while adding the event to Google Calendar: ${
+                err instanceof Error ? err.message : String(err)
+              }`;
+            }
+          },
+        },
         getCurrentTime: {
           description: "Returns the current time in HH:MM format.",
           inputSchema: z
@@ -72,7 +164,7 @@ export async function POST(req: Request) {
             .describe("The IANA time zone name, e.g., 'America/New_York'."),
           execute: async ({ timeZone }: { timeZone: string }) => {
             if (!isTimeZoneValue(timeZone)) {
-              return "The timezone is not valid. I want a format like this: America/New_York";
+              return "The timezone is not valid. I want a format like this: America/New_York. Call again this tool with a valid timezone.";
             }
 
             const now = new Date();
@@ -117,8 +209,8 @@ export async function POST(req: Request) {
 
             const allDesciptions: string[] = [];
             allEvents.forEach((event) => {
-              if (event.description) {
-                allDesciptions.push(event.description);
+              if (event.summary) {
+                allDesciptions.push(event.summary);
               }
             });
             return allDesciptions;
