@@ -9,9 +9,13 @@ const isTimeZoneValue = (timeZone: string): boolean => {
   }
 };
 
-function createPromptFromUserInfo(userInfo: UserPreferences): string {
-  const prompt = `You are assisting a user with their calendar and scheduling needs. Here is their configuration:
+function createPromptFromUserInfo(
+  userInfo: UserPreferences,
+  locale: string
+): string {
+  const today = new Date();
 
+  const prompt = `
 User Preferences:
 - Productive Time Slot: ${userInfo.productive_time_slot ?? "not configured"}
   (The user is most productive during this time window and prefers to schedule important and deep work sessions here)
@@ -28,7 +32,10 @@ When providing scheduling suggestions or analyzing the calendar:
 - Prioritize focus-intensive tasks within the productive time slot
 - Use the preferred focus session length when suggesting work blocks
 - Insert breaks according to the configured break length and sessions before break
-- Avoid scheduling back-to-back meetings that disrupt planned focus and break cycles`;
+- Avoid scheduling back-to-back meetings that disrupt planned focus and break cycles
+
+Current Date: ${today.toDateString()}
+Timezone: ${locale}`;
 
   return prompt;
 }

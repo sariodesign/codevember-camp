@@ -11,6 +11,7 @@ import {
   findUserPreferencesByUserId,
   UserPreferences,
 } from "@/lib/repositories/user_preferences";
+import { findProfileById } from "@/lib/repositories/profile.repository";
 
 export const runtime = "nodejs";
 
@@ -22,51 +23,53 @@ export async function POST(req: Request) {
   try {
     const { messages }: { messages: UIMessage[] } = await req.json();
     const supabase = await createClient();
+    const infoUserPrompt = await getUserPrompt();
 
     const result = await streamText({
       model: ollama(LLM_MODEL),
-      system: SYSTEM_PROMPT,
+      system: SYSTEM_PROMPT.concat("\n").concat(infoUserPrompt),
       messages: convertToModelMessages(messages),
       stopWhen: stepCountIs(5),
       tools: {
-        getUserInfoPrompt: {
-          description:
-            "Returns user information from the session. Use this tool first when user ask for event-related information.",
-          inputSchema: z.object().describe("No input needed."),
-          outputSchema: z.string().describe("The user information prompt."),
-          execute: async () => {
-            try {
-              const { data, error } = await supabase.auth.getUser();
+        // getUserInfoPrompt: {
+        //   description:
+        //     "Returns user information from the session. Use this tool first when user ask for event-related information.",
+        //   inputSchema: z.object().describe("No input needed."),
+        //   outputSchema: z.string().describe("The user information prompt."),
+        //   execute: async () => {
+        //     try {
+        //       const { data, error } = await supabase.auth.getUser();
 
-              if (error) {
-                throw new Error("Impossible to get session");
-              }
+        //       if (error) {
+        //         throw new Error("Impossible to get session");
+        //       }
 
-              const userId = data.user?.id;
+        //       const userId = data.user?.id;
 
-              const userInfo = await findUserPreferencesByUserId(
-                supabase,
-                userId!
-              );
+        //       const userInfo = await findUserPreferencesByUserId(
+        //         supabase,
+        //         userId!
+        //       );
 
-              if (!userInfo) {
-                throw new Error("User info not found");
-              }
+        //       if (!userInfo) {
+        //         throw new Error("User info not found");
+        //       }
 
-              const prompt = createPromptFromUserInfo(
-                userInfo as UserPreferences
-              );
+        //       const prompt = createPromptFromUserInfo(
+        //         userInfo as UserPreferences
+        //       );
 
-              return prompt;
-            } catch (err) {
-              return `Error retrieving user info: ${
-                err instanceof Error ? err.message : String(err)
-              }`;
-            }
-          },
-        },
+        //       return prompt;
+        //     } catch (err) {
+        //       return `Error retrieving user info: ${
+        //         err instanceof Error ? err.message : String(err)
+        //       }`;
+        //     }
+        //   },
+        // },
         addGoogleCalendarEvent: {
-          description: "Adds a new event to the user's Google Calendar.",
+          description:
+            "Adds a new event to the user's Google Calendar. Call this tool when the user wants to add an event to their calendar. If not specified, use the user preferences for timezone, time range and session length.",
           inputSchema: z.object({
             summary: z
               .string()
@@ -123,6 +126,15 @@ export async function POST(req: Request) {
                 throw new Error("No provider token available");
               }
 
+              console.log("Adding event with details:", {
+                summary,
+                description,
+                location,
+                startDateTime,
+                endDateTime,
+                timeZone,
+              });
+
               const response: Response = await INSERTEvent(providerToken, {
                 summary,
                 description,
@@ -157,22 +169,22 @@ export async function POST(req: Request) {
             }
           },
         },
-        getCurrentTime: {
-          description: "Returns the current time in HH:MM format.",
-          inputSchema: z
-            .object({ timeZone: z.string() })
-            .describe("The IANA time zone name, e.g., 'America/New_York'."),
-          execute: async ({ timeZone }: { timeZone: string }) => {
-            if (!isTimeZoneValue(timeZone)) {
-              return "The timezone is not valid. I want a format like this: America/New_York. Call again this tool with a valid timezone.";
-            }
+        // getCurrentTime: {
+        //   description: "Returns the current time in HH:MM format.",
+        //   inputSchema: z
+        //     .object({ timeZone: z.string() })
+        //     .describe("The IANA time zone name, e.g., 'America/New_York'."),
+        //   execute: async ({ timeZone }: { timeZone: string }) => {
+        //     if (!isTimeZoneValue(timeZone)) {
+        //       return "The timezone is not valid. I want a format like this: America/New_York. Call again this tool with a valid timezone.";
+        //     }
 
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, "0");
-            const minutes = now.getMinutes().toString().padStart(2, "0");
-            return `${hours}:${minutes}`;
-          },
-        },
+        //     const now = new Date();
+        //     const hours = now.getHours().toString().padStart(2, "0");
+        //     const minutes = now.getMinutes().toString().padStart(2, "0");
+        //     return `${hours}:${minutes}`;
+        //   },
+        // },
         getAllTheEvents: {
           description:
             "Returns all the descriptions of events happening today from Google Calendar.",
@@ -227,5 +239,40 @@ export async function POST(req: Request) {
       }`,
       { status: 500 }
     );
+  }
+}
+
+async function getUserPrompt() {
+  const supabase = await createClient();
+  try {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) {
+      throw new Error("Impossible to get session");
+    }
+
+    const userId = data.user?.id;
+
+    if (!userId) {
+      throw new Error("User not logged in");
+    }
+
+    const userInfo = await findUserPreferencesByUserId(supabase, userId);
+    const userProfile = await findProfileById(supabase, userId);
+
+    if (!userInfo || !userProfile?.timezone) {
+      throw new Error("Missing info");
+    }
+
+    const prompt = createPromptFromUserInfo(
+      userInfo as UserPreferences,
+      userProfile?.timezone
+    );
+
+    return prompt;
+  } catch (err) {
+    return `Error retrieving user info: ${
+      err instanceof Error ? err.message : String(err)
+    }`;
   }
 }
