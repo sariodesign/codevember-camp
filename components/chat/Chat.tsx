@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useRef } from "react";
 import { useChatLogic } from "@/hooks/chat/useChatLogic";
 
 export default function Chat() {
@@ -30,6 +31,27 @@ export default function Chat() {
       </div>
     </div>
   );
+
+  function ToolAddGoogleCalendarEvent({ output }: { output: string }) {
+    const dispatchedRef = useRef(false);
+
+    useEffect(() => {
+      if (dispatchedRef.current) return;
+      if (!output || !output.trim()) return;
+
+      try {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("calendar:updated"));
+        }
+      } catch (e) {
+        console.error("Error dispatching calendar:updated event", e);
+      }
+
+      dispatchedRef.current = true;
+    }, [output]);
+
+    return <ToolMessage toolName="addGoogleCalendarEvent" output={output} />;
+  }
 
   return (
     <>
@@ -134,9 +156,8 @@ export default function Chat() {
 
                     case "tool-addGoogleCalendarEvent":
                       return (
-                        <ToolMessage
+                        <ToolAddGoogleCalendarEvent
                           key={message.id}
-                          toolName="addGoogleCalendarEvent"
                           output={part.output?.toString() || ""}
                         />
                       );
