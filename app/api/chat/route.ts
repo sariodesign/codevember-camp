@@ -3,7 +3,7 @@ import { convertToModelMessages, stepCountIs, streamText, UIMessage } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { LLM_MODEL, SYSTEM_PROMPT } from "@/utils/constant/chat";
-import { createPromptFromUserInfo, isTimeZoneValue } from "@/utils/shared";
+import { createPromptFromUserInfo } from "@/utils/shared";
 import { createClient } from "@/utils/supabase/server";
 import { CalendarEvent } from "@/types/event";
 import { GETEvents, INSERTEvent } from "@/network/google_calendar";
@@ -31,42 +31,6 @@ export async function POST(req: Request) {
       messages: convertToModelMessages(messages),
       stopWhen: stepCountIs(5),
       tools: {
-        // getUserInfoPrompt: {
-        //   description:
-        //     "Returns user information from the session. Use this tool first when user ask for event-related information.",
-        //   inputSchema: z.object().describe("No input needed."),
-        //   outputSchema: z.string().describe("The user information prompt."),
-        //   execute: async () => {
-        //     try {
-        //       const { data, error } = await supabase.auth.getUser();
-
-        //       if (error) {
-        //         throw new Error("Impossible to get session");
-        //       }
-
-        //       const userId = data.user?.id;
-
-        //       const userInfo = await findUserPreferencesByUserId(
-        //         supabase,
-        //         userId!
-        //       );
-
-        //       if (!userInfo) {
-        //         throw new Error("User info not found");
-        //       }
-
-        //       const prompt = createPromptFromUserInfo(
-        //         userInfo as UserPreferences
-        //       );
-
-        //       return prompt;
-        //     } catch (err) {
-        //       return `Error retrieving user info: ${
-        //         err instanceof Error ? err.message : String(err)
-        //       }`;
-        //     }
-        //   },
-        // },
         addGoogleCalendarEvent: {
           description:
             "Adds a new event to the user's Google Calendar. Call this tool when the user wants to add an event to their calendar. If not specified, use the user preferences for timezone, time range and session length.",
@@ -113,78 +77,54 @@ export async function POST(req: Request) {
             endDateTime: string;
             timeZone?: string;
           }) => {
-            try {
-              const { data, error } = await supabase.auth.getSession();
+            const { data, error } = await supabase.auth.getSession();
 
-              if (error) {
-                throw new Error("Impossible to get session");
-              }
+            if (error) {
+              throw new Error("Impossible to get session");
+            }
 
-              const providerToken = data.session?.provider_token;
+            const providerToken = data.session?.provider_token;
 
-              if (!providerToken) {
-                throw new Error("No provider token available");
-              }
+            if (!providerToken) {
+              throw new Error("No provider token available");
+            }
 
-              console.log("Adding event with details:", {
-                summary,
-                description,
-                location,
-                startDateTime,
-                endDateTime,
-                timeZone,
-              });
+            const eventDetails: string = `
+                Summary: ${summary ?? "N/A"}
+                Description: ${description ?? "N/A"}
+                Location: ${location ?? "N/A"}
+                Start DateTime: ${startDateTime}
+                End DateTime: ${endDateTime}
+                TimeZone: ${timeZone ?? "N/A"}`;
 
-              const response: Response = await INSERTEvent(providerToken, {
-                summary,
-                description,
-                location,
-                start: {
-                  dateTime: startDateTime,
-                  timeZone: timeZone,
-                },
-                end: {
-                  dateTime: endDateTime,
-                  timeZone: timeZone,
-                },
-              });
+            const response: Response = await INSERTEvent(providerToken, {
+              summary,
+              description,
+              location,
+              start: {
+                dateTime: startDateTime,
+                timeZone: timeZone,
+              },
+              end: {
+                dateTime: endDateTime,
+                timeZone: timeZone,
+              },
+            });
 
-              if (!response.ok) {
-                const errorData = await response.json();
-                console.error(
-                  "Error response from Google Calendar API:",
-                  errorData
-                );
-                return `Failed to add event: ${
-                  errorData.error?.message ?? "Unknown error"
-                }`;
-              }
-
-              return "Event added successfully to your Google Calendar.";
-            } catch (err) {
-              console.error("Unexpected error in addGoogleCalendarEvent:", err);
-              return `Error while adding the event to Google Calendar: ${
-                err instanceof Error ? err.message : String(err)
+            if (!response.ok) {
+              const errorData = await response.json();
+              console.error(
+                "Error response from Google Calendar API:",
+                errorData
+              );
+              return `Failed to add event: ${
+                errorData.error?.message ?? "Unknown error"
               }`;
             }
+
+            return `Event added successfully to your Google Calendar. Event Details: ${eventDetails}`;
           },
         },
-        // getCurrentTime: {
-        //   description: "Returns the current time in HH:MM format.",
-        //   inputSchema: z
-        //     .object({ timeZone: z.string() })
-        //     .describe("The IANA time zone name, e.g., 'America/New_York'."),
-        //   execute: async ({ timeZone }: { timeZone: string }) => {
-        //     if (!isTimeZoneValue(timeZone)) {
-        //       return "The timezone is not valid. I want a format like this: America/New_York. Call again this tool with a valid timezone.";
-        //     }
-
-        //     const now = new Date();
-        //     const hours = now.getHours().toString().padStart(2, "0");
-        //     const minutes = now.getMinutes().toString().padStart(2, "0");
-        //     return `${hours}:${minutes}`;
-        //   },
-        // },
         getAllTheEvents: {
           description:
             "Returns all the descriptions of events happening today from Google Calendar.",
