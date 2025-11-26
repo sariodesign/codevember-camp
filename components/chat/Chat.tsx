@@ -105,29 +105,11 @@ export default function Chat() {
                       );
                     }
 
-                    case "tool-getCurrentTime":
-                      return (
-                        <ToolMessage
-                          key={message.id}
-                          toolName="getCurrentTime"
-                          output={part.output?.toString() || ""}
-                        />
-                      );
-
                     case "tool-getAllTheEvents":
                       return (
                         <ToolMessage
                           key={message.id}
                           toolName="getAllTheEvents"
-                          output={part.output?.toString() || ""}
-                        />
-                      );
-
-                    case "tool-getUserInfoPrompt":
-                      return (
-                        <ToolMessage
-                          key={message.id}
-                          toolName="getUserInfoPrompt"
                           output={part.output?.toString() || ""}
                         />
                       );
