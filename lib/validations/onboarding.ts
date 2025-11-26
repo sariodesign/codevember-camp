@@ -24,6 +24,6 @@ export const onboardingSchema = z.object({
 
 
 export type Project = z.infer<typeof projectSchema>
-export type onboarding = z.infer<typeof onboardingSchema>;
+export type Onboarding = z.infer<typeof onboardingSchema>;
 export type ProjectForm = z.infer<typeof pojectsFormSchema>;
 export type FocusTimeForm = z.infer<typeof focusTimeFormSchema>;

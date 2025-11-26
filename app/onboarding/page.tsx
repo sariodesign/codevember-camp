@@ -1,8 +1,6 @@
 "use client";
 
-import { FocusTimeForm } from "@/components/forms/FocusTimeForm";
-import { ProjectsForm } from "@/components/forms/ProjectsForm";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,52 +8,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useState } from "react";
-import { FocusTime, Project } from "@/types/shared";
-
-interface UserOnboardingQuestions {
-  focusTime: {
-    productiveTimeSlot: string;
-    focusTimeLength: string;
-    pauseTimeLength: string;
-    sessionsBeforeBreak: string;
-  };
-  projects: {
-    projects: Project[];
-  };
-}
+import { FocusTimeForm } from "@/components/forms/FocusTimeForm";
+import { ProjectsForm } from "@/components/forms/ProjectsForm";
+import { useOnboardingForm } from "@/hooks/onboarding/useOnboardingForm";
 
 export default function Onboarding() {
-  const [step, setStep] = useState(1);
-  const [userOnboardingQuestions, setUserOnboardingQuestions] =
-    useState<UserOnboardingQuestions>({
-      focusTime: {
-        productiveTimeSlot: "",
-        focusTimeLength: "",
-        pauseTimeLength: "",
-        sessionsBeforeBreak: "",
-      },
-      projects: {
-        projects: [],
-      },
-    });
+  const [currentStep, setCurrentStep] = useState(1);
 
-  const handleFocusTimeSubmit = (value: FocusTime) => {
-    setUserOnboardingQuestions({
-      ...userOnboardingQuestions,
-      focusTime: value,
-    });
-    setStep(2);
+  const form = useOnboardingForm()
+
+  const handleFocusTimeSubmit = () => {
+    // setUserOnboardingQuestions({
+    //   ...userOnboardingQuestions,
+    //   focusTime: value,
+    // });
+    setCurrentStep(2);
   };
 
-  const handleProjectsSubmit = (value: Project[]) => {
-    setUserOnboardingQuestions({
-      ...userOnboardingQuestions,
-      projects: {
-        projects: value,
-      },
-    });
+  const handleProjectsSubmit = () => {
+    // setUserOnboardingQuestions({
+    //   ...userOnboardingQuestions,
+    //   projects: {
+    //     projects: value,
+    //   },
+    // });
   };
 
   return (
@@ -66,40 +44,36 @@ export default function Onboarding() {
             <div className="space-y-6 flex justify-between">
               <h1 className="text-2xl font-bold">Onboarding</h1>
               <div>
-                Step {step} di 2
+                step {currentStep} di 2
                 <Progress
                   className="max-w-2xs mx-auto mt-4"
-                  value={(step / 2) * 100}
+                  value={(currentStep / 2) * 100}
                 />
               </div>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {step === 1 && (
+          {currentStep === 1 && (
             <FocusTimeForm
+              form={form}
               onSubmit={handleFocusTimeSubmit}
-              defaultValues={userOnboardingQuestions.focusTime}
             />
           )}
 
-          {step === 2 && (
+          {currentStep === 2 && (
             <ProjectsForm
+              form={form}
               onSubmit={handleProjectsSubmit}
-              defaultValues={userOnboardingQuestions.projects.projects}
             />
           )}
         </CardContent>
         <CardFooter className="flex justify-end gap-2">
-          {step > 1 && (
-            <Button onClick={() => setStep(step - 1)} variant="outline">
+          {currentStep > 1 && (
+            <Button onClick={() => setCurrentStep(currentStep - 1)} variant="outline">
               Indietro
             </Button>
           )}
-
-          {/* <Button onClick={() => setStep(step + 1)} disabled={step === 2}>
-            Avanti
-          </Button> */}
         </CardFooter>
       </Card>
     </div>
