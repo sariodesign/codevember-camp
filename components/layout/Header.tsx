@@ -1,7 +1,7 @@
 'use client'
 
 import { logout } from "@/app/actions/logout";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function Header({ 
   title = "Header",
@@ -32,16 +34,13 @@ export default function Header({
       <div>
         {user && (
           <div className="flex items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={user.user_metadata.avatar_url}
               alt="Avatar"
               width={40}
               height={40}
               className="rounded-full mr-4"
-
             />
-
             <DropdownMenu open={open} onOpenChange={setOpen}>
               <DropdownMenuTrigger className="flex items-center gap-2">
                 <p className="">{user.user_metadata.full_name}</p>
@@ -50,7 +49,9 @@ export default function Header({
               <DropdownMenuContent>
                 <DropdownMenuLabel>Il mio account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profilo</DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/profile">Profilo</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
