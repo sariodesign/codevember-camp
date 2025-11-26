@@ -16,17 +16,15 @@ export default async function ProfilePage() {
   const currentUser = await findProfileById(supabase, (await getCurrentUser()).data.user?.id || "");
   const preferencesData = await findUserPreferencesByUserId(supabase, currentUser?.id || "");
 
-  console.log('Preferences Data:', preferencesData);
-
   return (
     <section className="max-w-6xl mx-auto space-y-6">
       <div className="pt-6">
-        <h1 className="text-2xl font-bold mb-4">My profile</h1>
-        <p className="text-gray-700">Welcome to your profile page!</p>
+        <h1 className="text-2xl font-bold mb-4">Il mio profilo</h1>
+        <p className="text-gray-700">Benvenuto nella tua pagina del profilo!</p>
       </div>
       {currentUser && (
         <Card className="p-4">
-          <h2>Personal Details</h2>
+          <h2>Dettagli personali</h2>
           <div className="flex gap-2">
             <Avatar>
               <AvatarImage src={currentUser.avatar_url || ""} />
@@ -49,14 +47,14 @@ export default async function ProfilePage() {
       
       <Card className="p-4">
         <CardHeader className="p-0">
-          <CardTitle>Personal preferences</CardTitle>
+          <CardTitle>Preferenze personali</CardTitle>
           <CardDescription>
-            Manage your personal preferences for focus sessions and breaks.
+            Gestisci le tue preferenze personali per le sessioni di focus e le pause.
           </CardDescription>
           <CardAction>
             <Button variant="outline" size="sm" className="cursor-pointer">
               <Pencil1Icon />
-              <span>Edit</span>
+              <span>Modifica</span>
             </Button>
           </CardAction>
         </CardHeader>
