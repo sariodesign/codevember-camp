@@ -50,7 +50,7 @@ export default function LoginForm() {
             await supabase.auth.signInWithOAuth({
               provider: "google",
               options: {
-                redirectTo: `http://localhost:3000/auth/callback`,
+                redirectTo: `${process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URL}/auth/callback`,
                 scopes: "https://www.googleapis.com/auth/calendar",
                 queryParams: {
                   access_type: "offline",
@@ -65,7 +65,7 @@ export default function LoginForm() {
         </Button>
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-        
+
         <p className="text-xs text-muted-foreground mt-4">
           Accedendo accetti i termini e la privacy. I dati saranno usati solo per autenticazione e
           sincronizzazione del calendario.
