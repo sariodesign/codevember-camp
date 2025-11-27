@@ -123,7 +123,7 @@ interface BirthdayProperties {
 export interface CalendarEvent {
   kind?: string;
   etag?: string;
-  id?: string;
+  id: string;
   status?: string;
   htmlLink?: string;
   created?: string;
