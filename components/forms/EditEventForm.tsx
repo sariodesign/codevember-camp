@@ -5,6 +5,7 @@ import { useState } from "react";
 export type EditEventFormValues = {
   summary?: string;
   description?: string;
+  location?: string;
   start?: string;
   end?: string;
 };
@@ -51,6 +52,18 @@ export default function EditEventForm({
           value={values.description ?? ""}
           onChange={(e) =>
             setValues((s) => ({ ...s, description: e.target.value }))
+          }
+          className="w-full rounded border px-2 py-1"
+          rows={3}
+        />
+      </div>
+
+        <div>
+        <label className="block text-sm">Location</label>
+        <textarea
+          value={values.location ?? ""}
+          onChange={(e) =>
+            setValues((s) => ({ ...s, location: e.target.value }))
           }
           className="w-full rounded border px-2 py-1"
           rows={3}

@@ -28,6 +28,7 @@ export function buildPatchFromValues(
 
   if (values.summary !== undefined) patch.summary = values.summary;
   if (values.description !== undefined) patch.description = values.description;
+  if (values.location !== undefined) patch.location = values.location;
 
   if (values.start) {
     patch.start = usesDateTime

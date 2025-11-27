@@ -333,6 +333,7 @@ export default function Calendar({
                           initial={{
                             summary: event.summary || "",
                             description: event.description || "",
+                            location: event.location || "",
                             start: toLocalInputDateTime(
                               event.start?.dateTime || ""
                             ),
