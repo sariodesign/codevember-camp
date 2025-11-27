@@ -1,10 +1,12 @@
 "use client";
 
-import { Calendar } from "@/components/ui/calendar";
 import { useDashboard } from "@/hooks/dashboard/useDashboard";
+import { Calendar } from "@/components/ui/calendar-shadcn";
 
 export default function Dashboard() {
   const { date, eventsForSelectedDate, setDate, loading, hasEvents } = useDashboard()
+
+  console.log("Rendering Dashboard with date:", hasEvents);
 
   if (loading) {
     return <div className="p-6">Caricamento eventi del calendario...</div>;

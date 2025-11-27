@@ -1,218 +1,221 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react"
-import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
+import { useState, useMemo } from "react";
+import { GoogleCalendarEvent } from "@/utils/mappers/mapGoogleCalendarEvents";
 
-import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+type CalendarItem = GoogleCalendarEvent;
 
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  captionLayout = "label",
-  buttonVariant = "ghost",
-  formatters,
-  components,
-  ...props
-}: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
-}) {
-  const defaultClassNames = getDefaultClassNames()
+type CalendarProps = {
+  items: CalendarItem[];
+};
 
-  
+const formatMonthYear = (date: Date) =>
+  date.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
 
-  return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn(
-        "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
-        String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
-        String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
-        className
-      )}
-      captionLayout={captionLayout}
-      formatters={{
-        formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
-        ...formatters,
-      }}
-      classNames={{
-        root: cn("w-fit", defaultClassNames.root),
-        months: cn(
-          "flex gap-4 flex-col md:flex-row relative",
-          defaultClassNames.months
-        ),
-        month: cn("flex flex-col w-full gap-4", defaultClassNames.month),
-        nav: cn(
-          "flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between",
-          defaultClassNames.nav
-        ),
-        button_previous: cn(
-          buttonVariants({ variant: buttonVariant }),
-          "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
-          defaultClassNames.button_previous
-        ),
-        button_next: cn(
-          buttonVariants({ variant: buttonVariant }),
-          "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
-          defaultClassNames.button_next
-        ),
-        month_caption: cn(
-          "flex items-center justify-center h-(--cell-size) w-full px-(--cell-size)",
-          defaultClassNames.month_caption
-        ),
-        dropdowns: cn(
-          "w-full flex items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
-          defaultClassNames.dropdowns
-        ),
-        dropdown_root: cn(
-          "relative has-focus:border-ring border border-input shadow-xs has-focus:ring-ring/50 has-focus:ring-[3px] rounded-md",
-          defaultClassNames.dropdown_root
-        ),
-        dropdown: cn(
-          "absolute bg-popover inset-0 opacity-0",
-          defaultClassNames.dropdown
-        ),
-        caption_label: cn(
-          "select-none font-medium",
-          captionLayout === "label"
-            ? "text-sm"
-            : "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:text-muted-foreground [&>svg]:size-3.5",
-          defaultClassNames.caption_label
-        ),
-        table: "w-full border-collapse",
-        weekdays: cn("flex", defaultClassNames.weekdays),
-        weekday: cn(
-          "text-muted-foreground rounded-md flex-1 font-normal text-[0.8rem] select-none",
-          defaultClassNames.weekday
-        ),
-        week: cn("flex w-full mt-2", defaultClassNames.week),
-        week_number_header: cn(
-          "select-none w-(--cell-size)",
-          defaultClassNames.week_number_header
-        ),
-        week_number: cn(
-          "text-[0.8rem] select-none text-muted-foreground",
-          defaultClassNames.week_number
-        ),
-        day: cn(
-          "relative w-full h-full p-0 text-center [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
-          props.showWeekNumber
-            ? "[&:nth-child(2)[data-selected=true]_button]:rounded-l-md"
-            : "[&:first-child[data-selected=true]_button]:rounded-l-md",
-          defaultClassNames.day
-        ),
-        range_start: cn(
-          "rounded-l-md bg-accent",
-          defaultClassNames.range_start
-        ),
-        range_middle: cn("rounded-none", defaultClassNames.range_middle),
-        range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
-        today: cn(
-          "bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none",
-          defaultClassNames.today
-        ),
-        outside: cn(
-          "text-muted-foreground aria-selected:text-muted-foreground",
-          defaultClassNames.outside
-        ),
-        disabled: cn(
-          "text-muted-foreground opacity-50",
-          defaultClassNames.disabled
-        ),
-        hidden: cn("invisible", defaultClassNames.hidden),
-        ...classNames,
-      }}
-      components={{
-        Root: ({ className, rootRef, ...props }) => {
-          return (
-            <div
-              data-slot="calendar"
-              ref={rootRef}
-              className={cn(className)}
-              {...props}
-            />
-          )
-        },
-        Chevron: ({ className, orientation, ...props }) => {
-          if (orientation === "left") {
-            return (
-              <ChevronLeftIcon className={cn("size-4", className)} {...props} />
-            )
-          }
+const getDateKey = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
 
-          if (orientation === "right") {
-            return (
-              <ChevronRightIcon
-                className={cn("size-4", className)}
-                {...props}
-              />
-            )
-          }
+const createMonthGrid = (month: Date): Date[] => {
+  const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
+  const start = new Date(startOfMonth);
 
-          return (
-            <ChevronDownIcon className={cn("size-4", className)} {...props} />
-          )
-        },
-        DayButton: CalendarDayButton,
-        WeekNumber: ({ children, ...props }) => {
-          return (
-            <td {...props}>
-              <div className="flex size-(--cell-size) items-center justify-center text-center">
-                {children}
-              </div>
-            </td>
-          )
-        },
-        ...components,
-      }}
-      {...props}
-    />
-  )
-}
+  // Lunedì come primo giorno della settimana
+  const weekday = start.getDay(); // 0=Dom, 1=Lun, ...
+  const offset = (weekday + 6) % 7; // trasformo in indice con lunedì=0
+  start.setDate(start.getDate() - offset);
 
-function CalendarDayButton({
-  className,
-  day,
-  modifiers,
-  ...props
-}: React.ComponentProps<typeof DayButton>) {
-  const defaultClassNames = getDefaultClassNames()
+  const days: Date[] = [];
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    days.push(d);
+  }
+  return days;
+};
 
-  const ref = React.useRef<HTMLButtonElement>(null)
-  React.useEffect(() => {
-    if (modifiers.focused) ref.current?.focus()
-  }, [modifiers.focused])
+export default function Calendar({ items }: CalendarProps) {
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() => new Date());
+
+  const days = useMemo(() => createMonthGrid(currentMonth), [currentMonth]);
+
+  const todayKey = getDateKey(new Date());
+  const selectedKey = selectedDate ? getDateKey(selectedDate) : null;
+  const monthIndex = currentMonth.getMonth();
+
+  const eventsByDate = useMemo(() => {
+    const map = new Map<string, CalendarItem[]>();
+
+    for (const item of items) {
+      if (!item.start?.dateTime) continue;
+      const eventDate = new Date(item.start.dateTime);
+      const key = getDateKey(eventDate);
+
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(item);
+    }
+
+    return map;
+  }, [items]);
+
+
+  const visibleEvents =
+    selectedKey && eventsByDate.get(selectedKey) ? eventsByDate.get(selectedKey)! : [];
+
+  const handlePrevMonth = () => {
+    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const handleSelectDate = (date: Date) => {
+    setSelectedDate(date);
+  };
 
   return (
-    <Button
-      ref={ref}
-      variant="ghost"
-      size="icon"
-      data-day={day.date.toLocaleDateString()}
-      data-selected-single={
-        modifiers.selected &&
-        !modifiers.range_start &&
-        !modifiers.range_end &&
-        !modifiers.range_middle
-      }
-      data-range-start={modifiers.range_start}
-      data-range-end={modifiers.range_end}
-      data-range-middle={modifiers.range_middle}
-      className={cn(
-        "data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70",
-        defaultClassNames.day,
-        className
-      )}
-      {...props}
-    />
-  )
-}
+    <div className="w-full mx-auto rounded-3xl">
+      <div className="rounded-3xl bg-white/80 backdrop-blur-sm">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 className="text-2xl font-semibold capitalize text-slate-900">
+              {formatMonthYear(currentMonth)}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrevMonth}
+              className="h-9 w-9 rounded-full border border-slate-100 bg-white shadow-sm flex items-center justify-center text-slate-600 text-lg leading-none hover:-translate-y-0.5 hover:shadow-md transition"
+              aria-label="Mese precedente"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              className="h-9 w-9 rounded-full border border-slate-100 bg-white shadow-sm flex items-center justify-center text-slate-600 text-lg leading-none hover:-translate-y-0.5 hover:shadow-md transition"
+              aria-label="Mese successivo"
+            >
+              ›
+            </button>
+          </div>
+        </div>
 
-export { Calendar, CalendarDayButton }
+        {/* Weekday labels */}
+        <div className="grid grid-cols-7 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-500 mb-2">
+          {['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'].map((label) => (
+            <div key={label} className="py-1">
+              {label}
+            </div>
+          ))}
+        </div>
+
+        {/* Grid */}
+        <div className="grid grid-cols-7 border border-slate-300 rounded-md overflow-hidden gap-px bg-slate-300 mb-4">
+          {days.map((day) => {
+            const key = getDateKey(day);
+            const isToday = key === todayKey;
+            const isSelected = selectedKey === key;
+            const isCurrentMonth = day.getMonth() === monthIndex;
+            const events = eventsByDate.get(key) ?? [];
+            const hasEvents = events.length > 0;
+
+            const baseClasses =
+              'min-h-[100px] flex flex-col items-center justify-center px-2 text-xs sm:text-sm cursor-pointer transition relative';
+            let colorClasses = '';
+
+            if (isSelected) {
+              colorClasses =
+                'bg-slate-200';
+            } else if (!isCurrentMonth) {
+              colorClasses = 'bg-white text-slate-300 hover:bg-slate-50/60';
+            } else {
+              colorClasses = 'bg-white text-slate-700 hover:bg-slate-50';
+            }
+
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handleSelectDate(day)}
+                className={`${baseClasses} ${colorClasses}`}
+              >
+                <span className="font-semibold">{day.getDate()}</span>
+
+                {hasEvents && (
+                  <div className="flex flex-col">
+                    <span
+                      className={`mt-1 text-xs font-bold inline-flex items-center justify-center rounded-md px-2 py-2 leading-md ${
+                        isSelected
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-blue-200 text-slate-700'
+                      }`}
+                    >
+                      {events.length === 1
+                        ? events[0].summary
+                        : `${events.length} eventi`}
+                    </span>
+                  </div>
+                )}
+
+                {isToday && (
+                  <span className="absolute -top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-400 border border-white" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected day events */}
+        <div className="rounded-md bg-slate-50/80 border border-slate-100 p-3 sm:p-4">
+          <div className="flex items-baseline justify-between gap-2 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-700">
+              Eventi del giorno
+            </p>
+            {selectedDate && (
+              <p className="text-xs text-slate-400">
+                {selectedDate.toLocaleDateString('it-IT', {
+                  weekday: 'short',
+                  day: '2-digit',
+                  month: 'short',
+                })}
+              </p>
+            )}
+          </div>
+
+          {visibleEvents && visibleEvents.length === 0 ? (
+            <p className="text-xs sm:text-sm text-slate-400"> Nessun evento per questa data. 🍊</p>
+          ) : (
+            <ul className="space-y-2">
+              {visibleEvents.map((event, idx) => (
+                <li
+                  key={event.id + idx}
+                  className="flex items-center cursor-pointer justify-between rounded-xl bg-white px-3 py-2 shadow-sm border border-slate-100"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{event.summary}</p>
+                    {event.location && (
+                      <p className="text-xs text-slate-500">{event.location}</p>
+                    )}
+
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

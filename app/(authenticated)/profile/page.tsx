@@ -1,5 +1,5 @@
 import { LightningBoltIcon, LapTimerIcon, PauseIcon, UpdateIcon, Pencil1Icon } from "@radix-ui/react-icons"
-import { getCurrentUser } from "../actions/getCurrentUser";
+import { getCurrentUser } from "../../actions/getCurrentUser";
 import { createClient } from "@/utils/supabase/server"
 import { findUserPreferencesByUserId } from "@/lib/repositories/user_preferences";
 import { findProfileById } from "@/lib/repositories/profile.repository";
@@ -23,7 +23,7 @@ export default async function ProfilePage() {
         <p className="text-gray-700">Benvenuto nella tua pagina del profilo!</p>
       </div>
       {currentUser && (
-        <Card className="p-4">
+        <Card className="p-4 border-slate-300 shadow-none">
           <h2>Dettagli personali</h2>
           <div className="flex gap-2">
             <Avatar>
@@ -45,7 +45,7 @@ export default async function ProfilePage() {
         </Card>
       )}
       
-      <Card className="p-4">
+      <Card className="p-4 border-slate-300 shadow-none">
         <CardHeader className="p-0">
           <CardTitle>Preferenze personali</CardTitle>
           <CardDescription>

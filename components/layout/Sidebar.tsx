@@ -1,33 +1,25 @@
-'use client";'
-
-import React from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
-import { DialogTrigger } from "@radix-ui/react-dialog";
-import ChatPage from "@/app/chat/page";
+'use client'
+ 
+import { usePathname } from 'next/navigation'
+import { Calendar, LayoutDashboard } from "lucide-react"
+import Link from "next/link";
 
 export default function Sidebar() {
+  const pathname = usePathname()
+ 
   return (
-  <aside className="w-64 min-h-screen border-r bg-muted p-4 flex flex-col gap-4">
-    <h1 className="text-lg font-bold">Menu</h1>
-    <Dialog>
-      <DialogTrigger asChild className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-        <button>
-          Apri la Chat
-        </button>
-      </DialogTrigger>
-
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Chat con AI</DialogTitle>
-          <DialogDescription>
-            Fai domande o chiedi assistenza.
-          </DialogDescription>
-        </DialogHeader>
-
-          <ChatPage />
-
-      </DialogContent>
-    </Dialog>
-  </aside>
+    <aside className="w-fit min-h-screen border-r border-stone-200 px-4 py-8">
+      <div className="flex flex-col gap-4">
+        <Link href="/dashboard" className={`flex flex-col items-center gap-2 p-2 rounded-2xl hover:bg-accent ${pathname === '/dashboard' ? 'text-blue-500' : ''}`}>
+          <LayoutDashboard />
+          <span>Dashboard</span>
+        </Link>
+        <Link href="/calendar" className={`flex flex-col items-center gap-2 p-2 rounded-2xl hover:bg-accent ${pathname === '/calendar' ? 'text-blue-500' : ''}`}>
+          <Calendar />
+          <span>Calendar</span>
+        </Link>
+      </div>
+      {/* Sidebar content goes here */}
+    </aside>
   );
 }
