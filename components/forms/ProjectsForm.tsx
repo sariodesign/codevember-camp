@@ -1,40 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "@tanstack/react-form";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Button } from "@/components/ui/button";
+import { useStore } from "@tanstack/react-form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-
-type Project = {
-  name: string;
-  priority: string;
-};
+} from "@/components/ui/select";
+import { useOnboardingForm } from "@/hooks/onboarding/useOnboardingForm";
+import { Project } from "@/lib/validations/onboarding";
 
 interface Props {
-  onSubmit: (value: Project[]) => void;
-  defaultValues?: Project[];
+  form: ReturnType<typeof useOnboardingForm>
+  onSubmit: () => void
 }
 
-export const ProjectsForm = ({ onSubmit, defaultValues }: Props) => {
-  const [projectForms, setProjectForms] = useState(0);
-
-  const form = useForm({
-    defaultValues: {
-      projectForms: projectForms.toString().length, 
-      projects: defaultValues ?? [] as Project[],
-    },
-    onSubmit: async ({ value }) => {
-      onSubmit(value.projects);
-    },
-  });
+export const ProjectsForm = ({ form, onSubmit }: Props) => {
 
   const handleProjectsNumChange = (value: string) => {
     const num = parseInt(value, 10) || 0;
@@ -42,75 +26,64 @@ export const ProjectsForm = ({ onSubmit, defaultValues }: Props) => {
       name: "",
       priority: "",
     }));
-    form.setFieldValue("projectForms", value);
-    form.setFieldValue("projects", newProjects);
-    setProjectForms((prev) => prev + 1);
+    form.setFieldValue("projects.numberOfProjects", Number(value));
+    form.setFieldValue("projects.projects", newProjects);
   };
+
+  const projects = useStore(form.store, (state) => state.values.projects.projects);
 
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Progetti</h1>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          form.handleSubmit();
-        }}
-      >
-        <div className="space-y-4">
-          <form.Field
-            name="projectsNum"
-            validators={{
-              onChange: ({ value }) => {
-                if (!value || value === "0") {
-                  return "Devi indicare almeno un progetto";
-                }
-                return undefined;
-              },
-            }}
-          >
-            {(field) => {
-              return (
-                <div className="space-y-2">
-                  <div className="flex items-start py-2">
-                    <Label htmlFor={field.name}>
-                      A quanti progetti stai lavorando?
-                    </Label>
-                  </div>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(value) => {
-                      field.handleChange(value);
-                      handleProjectsNumChange(value);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleziona numero progetti" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 progetto</SelectItem>
-                      <SelectItem value="2">2 progetti</SelectItem>
-                      <SelectItem value="3">3 progetti</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {field.state.meta.errorMap["onChange"] && (
+      <form.AppForm>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit()
+          }}
+        >
+          <div className="space-y-4">
+            <form.AppField
+              name="projects.numberOfProjects"
+              children={(field) => {
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-start py-2">
+                      <Label htmlFor={field.name}>
+                        A quanti progetti stai lavorando?
+                      </Label>
+                    </div>
+                    <Select
+                      value={String(field.state.value)}
+                      onValueChange={handleProjectsNumChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleziona numero progetti" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 progetto</SelectItem>
+                        <SelectItem value="2">2 progetti</SelectItem>
+                        <SelectItem value="3">3 progetti</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {/* {field.state.meta.errorMap["onChange"] && (
                     <em className="text-red-700 dark:text-red-400 text-sm">
                       {field.state.meta.errorMap["onChange"]}
                     </em>
-                  )}
-                </div>
-              );
-            }}
-          </form.Field>
+                  )} */}
+                  </div>
+                );
+              }}
+            >
+            </form.AppField>
 
-          {form
-            .getFieldValue("projects")
-            .map((project: Project, index: number) => (
+            {projects.map((project: Project, index: number) => (
               <div key={index} className="border rounded p-3 space-y-3">
                 <h3 className="font-semibold">Progetto {index + 1}</h3>
 
                 <div className="flex space-x-4">
-                  <form.Field
-                    name={`projects[${index}].name`}
+                  <form.AppField
+                    name={`projects.projects[${index}].name`}
                     validators={{
                       onChange: ({ value }) => {
                         if (!(value as string)?.trim()) {
@@ -119,8 +92,7 @@ export const ProjectsForm = ({ onSubmit, defaultValues }: Props) => {
                         return undefined;
                       },
                     }}
-                  >
-                    {(field) => {
+                    children={(field) => {
                       return (
                         <div className="space-y-2">
                           <Label htmlFor={`name-${index}`}>
@@ -136,9 +108,10 @@ export const ProjectsForm = ({ onSubmit, defaultValues }: Props) => {
                         </div>
                       );
                     }}
-                  </form.Field>
-                  <form.Field name={`projects[${index}].priority`}>
-                    {(field) => {
+                  />
+                  <form.AppField
+                    name={`projects.projects[${index}].priority`}
+                    children={(field) => {
                       return (
                         <div className="space-y-2">
                           <Label htmlFor={`priority-${index}`}>
@@ -152,24 +125,25 @@ export const ProjectsForm = ({ onSubmit, defaultValues }: Props) => {
                               <SelectValue placeholder="Seleziona la priorità" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="alta">Alta</SelectItem>
-                              <SelectItem value="media">Media</SelectItem>
-                              <SelectItem value="bassa">Bassa</SelectItem>
+                              {/** 
+                               // TODO:  Lasciare così per ora, più avanti si possono gestire i valori con un enum
+                               */}
+                              <SelectItem value={`${1}`}>Alta</SelectItem>
+                              <SelectItem value={`${2}`}>Media</SelectItem>
+                              <SelectItem value={`${3}`}>Bassa</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       );
                     }}
-                  </form.Field>
+                  />
                 </div>
               </div>
             ))}
-
-          <Button type="submit" className="w-full">
-            Continua
-          </Button>
-        </div>
-      </form>
+            <form.SubscribeButton label="Continua" />
+          </div>
+        </form>
+      </form.AppForm>
     </div>
   );
 };
