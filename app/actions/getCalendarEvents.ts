@@ -1,6 +1,5 @@
 'use server'
 
-import { CalendarEvent } from "@/types/event";
 import { BASE_CALENDAR_URL } from "@/utils/constant/api_url";
 import { mapGoogleCalendarEvents } from "@/utils/mappers/mapGoogleCalendarEvents";
 import { createClient } from "@/utils/supabase/server";

@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "./button";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, CalendarPlus } from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
@@ -11,6 +12,7 @@ import {
   DialogTrigger,
 } from "./dialog";
 import EditEventForm, { EditEventFormValues } from "../forms/EditEventForm";
+import CreateEventForm from "../forms/CreateEventForm";
 import { toLocalInputDateTime } from "@/utils/date/formatters";
 import { CalendarEvent } from "@/types/event";
 
@@ -26,6 +28,11 @@ type CalendarProps = {
   ) => Promise<void>;
   updatingId: string | null;
   setUpdatingId?: (id: string | null) => void;
+  createEventFromValues: (
+    values: EditEventFormValues,
+    selectedDate: Date | undefined
+  ) => Promise<void>;
+  creatingId: boolean;
 };
 
 const formatMonthYear = (date: Date) =>
@@ -62,6 +69,8 @@ export default function Calendar({
   deletingId,
   editEventFromValues,
   updatingId,
+  createEventFromValues,
+  creatingId,
 }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
@@ -223,9 +232,49 @@ export default function Calendar({
         {/* Selected day events */}
         <div className="rounded-md bg-slate-50/80 border border-slate-100 p-3 sm:p-4">
           <div className="flex items-baseline justify-between gap-2 mb-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-700">
-              Eventi del giorno
-            </p>
+            <div className="flex items-baseline gap-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-700">
+                Eventi del giorno
+              </p>
+              <Dialog
+                open={isDialogOpen === "new"}
+                onOpenChange={(open) => {
+                  if (open) setIsDialogOpen("new");
+                  else setIsDialogOpen("");
+                }}
+              >
+                <DialogTrigger asChild>
+                  <Button
+                  variant={"outline"}>
+                    <CalendarPlus />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Crea nuovo evento</DialogTitle>
+                  </DialogHeader>
+                  <CreateEventForm
+                    selectedDate={selectedDate ?? undefined}
+                    onSubmit={async (values) => {
+                      try {
+                        setIsDialogOpen("");
+                        await createEventFromValues(
+                          values,
+                          selectedDate ?? undefined
+                        );
+                      } catch (error) {
+                        console.error(
+                          "Errore durante la creazione dell'evento:",
+                          error
+                        );
+                      }
+                    }}
+                    onCancel={() => setIsDialogOpen("")}
+                    submitting={creatingId}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
             {selectedDate && (
               <p className="text-xs text-slate-400">
                 {selectedDate.toLocaleDateString("it-IT", {
@@ -236,7 +285,9 @@ export default function Calendar({
               </p>
             )}
           </div>
-
+          <div className="flex justify-end">
+            
+          </div>
           {visibleEvents && visibleEvents.length === 0 ? (
             <p className="text-xs sm:text-sm text-slate-400">
               {" "}
@@ -257,22 +308,18 @@ export default function Calendar({
                       <p className="text-xs text-slate-500">{event.location}</p>
                     )}
                   </div>
-                  <div>
-                    <Button
-                      variant={"outline"}
-                      onClick={() => onDelete(event.id)}
-                      disabled={deletingId === event.id}
-                    >
-                      {deletingId === event.id ? "Eliminando..." : <Trash />}
-                    </Button>
-
-                    <Dialog
+                  <div className="space-x-2">
+                      <Dialog
                       key={updatingId}
                       open={event.id === isDialogOpen}
-                      onOpenChange={() => setIsDialogOpen(event.id)}
+                      onOpenChange={(open) =>{
+                        if (open) setIsDialogOpen(event.id)
+                        else setIsDialogOpen("");
+                      }}
                     >
                       <DialogTrigger asChild>
-                        <Button>
+                        <Button
+                        variant={"outline"}>
                           <Edit />
                         </Button>
                       </DialogTrigger>
@@ -309,6 +356,16 @@ export default function Calendar({
                         />
                       </DialogContent>
                     </Dialog>
+                    
+                    <Button
+                      
+                      onClick={() => onDelete(event.id)}
+                      disabled={deletingId === event.id}
+                    >
+                      {deletingId === event.id ? "Eliminando..." : <Trash />}
+                    </Button>
+
+                  
                   </div>
                 </li>
               ))}

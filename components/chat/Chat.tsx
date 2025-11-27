@@ -64,7 +64,7 @@ export default function Chat() {
           scrollbar-width: none;
         }
       `}</style>
-      <div className="flex h-[90vh] w-full max-w-3xl flex-col gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:mx-auto">
+      <div className="flex h-screen w-full max-w-3xl flex-col gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:mx-auto">
         <header className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -173,7 +173,7 @@ export default function Chat() {
                 submitMessage();
               }
             }}
-            className="max-h-40 flex-1 resize-none bg-transparent py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 disabled:opacity-60 scrollbar-hide dark:text-slate-100"
+            className="max-h-40 flex-1 resize-none bg-transparent py-5 text-sm text-slate-900 outline-none placeholder:text-slate-400 disabled:opacity-60 scrollbar-hide dark:text-slate-100"
           />
           <button
             type="submit"

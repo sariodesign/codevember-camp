@@ -1,6 +1,14 @@
-import { buildPatchFromValues } from "@/components/events/editEventHelper";
+import {
+  buildPatchFromValues,
+  buildEventFromValues,
+} from "@/components/events/editEventHelper";
 import { EditEventFormValues } from "@/components/forms/EditEventForm";
-import { DELETEEvent, GETEvents, PATCHEvent } from "@/network/google_calendar";
+import {
+  DELETEEvent,
+  GETEvents,
+  INSERTEvent,
+  PATCHEvent,
+} from "@/network/google_calendar";
 import { CalendarEvent } from "@/types/event";
 import {
   GoogleCalendarEvent,
@@ -15,6 +23,7 @@ export const useCalendar = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [creatingId, setCreatingId] = useState<boolean>(false);
 
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
@@ -86,24 +95,24 @@ export const useCalendar = () => {
 
   useEffect(() => {
     fetchEvents();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-//   useEffect(() => {
-//     const onCalendarUpdated = () => {
-//       fetchEvents();
-//     };
+    useEffect(() => {
+      const onCalendarUpdated = () => {
+        fetchEvents();
+      };
 
-//     if (typeof window !== "undefined") {
-//       window.addEventListener("calendar:updated", onCalendarUpdated);
-//     }
+      if (typeof window !== "undefined") {
+        window.addEventListener("calendar:updated", onCalendarUpdated);
+      }
 
-//     return () => {
-//       if (typeof window !== "undefined") {
-//         window.removeEventListener("calendar:updated", onCalendarUpdated);
-//       }
-//     };
-//   }, [fetchEvents]);
+      return () => {
+        if (typeof window !== "undefined") {
+          window.removeEventListener("calendar:updated", onCalendarUpdated);
+        }
+      };
+    }, [fetchEvents]);
 
   const eventsForSelectedDate = useMemo(() => {
     return events.filter((event) => {
@@ -145,6 +154,28 @@ export const useCalendar = () => {
     }
   };
 
+  const createEventFromValues = async (
+values: EditEventFormValues, selectedDate: Date  ) => {
+    const newEvent = buildEventFromValues(values);
+
+    try {
+      setCreatingId(true);
+      const token = await getUserToken();
+      if (!token) throw new Error("Token non disponibile");
+      const res = await INSERTEvent(token, newEvent);
+      if (!res.ok) {
+        const text = await res.text().catch(() => "Errore server");
+        throw new Error(text || `HTTP ${res.status}`);
+      }
+      await fetchEvents();
+    } catch (error) {
+      console.error("Errore durante la creazione dell'evento:", error);
+      alert("Si è verificato un errore durante la creazione dell'evento.");
+    } finally {
+      setCreatingId(false);
+    }
+  };
+
   return {
     date,
     setDate,
@@ -158,5 +189,7 @@ export const useCalendar = () => {
     editEventFromValues,
     updatingId,
     setUpdatingId,
+    createEventFromValues,
+    creatingId,
   };
 };

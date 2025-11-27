@@ -1,8 +1,28 @@
 import type { CalendarEvent } from "@/types/event";
 import type { EditEventFormValues } from "@/components/forms/EditEventForm";
 
+export function buildEventFromValues(
+values: EditEventFormValues): Partial<CalendarEvent> {
+  const newEvent: Partial<CalendarEvent> = {
+    summary: values.summary || "Senza titolo",
+    description: values.description || "",
+  };
 
-export function buildPatchFromValues(values: EditEventFormValues, originalEvent: CalendarEvent) {
+  if (values.start) {
+    newEvent.start = { dateTime: new Date(values.start).toISOString() };
+  }
+
+  if (values.end) {
+    newEvent.end = { dateTime: new Date(values.end).toISOString() };
+  }
+
+  return newEvent;
+}
+
+export function buildPatchFromValues(
+  values: EditEventFormValues,
+  originalEvent: CalendarEvent
+) {
   const usesDateTime = !!originalEvent.start?.dateTime;
   const patch: Partial<CalendarEvent> = {};
 
