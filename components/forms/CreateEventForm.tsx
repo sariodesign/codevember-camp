@@ -1,30 +1,51 @@
 "use client";
-// ...existing code...
-import { useState } from "react";
 
-export type EditEventFormValues = {
-  summary?: string;
-  description?: string;
-  location?: string;
-  start?: string;
-  end?: string;
-};
+import { useState, useMemo } from "react";
+import type { EditEventFormValues } from "./EditEventForm";
 
-export default function EditEventForm({
-  initial,
+export default function CreateEventForm({
+  selectedDate,
   onSubmit,
   onCancel,
   submitting,
 }: {
-  initial: EditEventFormValues;
+  selectedDate: Date | undefined;
   onSubmit: (values: EditEventFormValues) => void;
   onCancel: () => void;
   submitting?: boolean;
 }) {
-  const [values, setValues] = useState<EditEventFormValues>(initial);
+  // Calcola i valori iniziali in base alla data selezionata
+  const defaultValues = useMemo(() => {
+    if (!selectedDate) {
+      return {
+        summary: "",
+        description: "",
+        start: "",
+        end: "",
+      };
+    }
+
+    // Crea una data alle 10:00 della data selezionata
+    const startDate = new Date(selectedDate);
+    startDate.setHours(10, 0, 0, 0);
+    const startString = startDate.toISOString().slice(0, 16);
+
+    // Fine alle 11:00
+    const endDate = new Date(startDate);
+    endDate.setHours(11, 0, 0, 0);
+    const endString = endDate.toISOString().slice(0, 16);
+
+    return {
+      summary: "",
+      description: "",
+      start: startString,
+      end: endString,
+    };
+  }, [selectedDate]);
+
+  const [values, setValues] = useState<EditEventFormValues>(defaultValues);
 
   const isValid = values.start && values.end && values.start <= values.end;
-
 
   return (
     <form
@@ -52,18 +73,6 @@ export default function EditEventForm({
           value={values.description ?? ""}
           onChange={(e) =>
             setValues((s) => ({ ...s, description: e.target.value }))
-          }
-          className="w-full rounded border px-2 py-1"
-          rows={3}
-        />
-      </div>
-
-        <div>
-        <label className="block text-sm">Location</label>
-        <textarea
-          value={values.location ?? ""}
-          onChange={(e) =>
-            setValues((s) => ({ ...s, location: e.target.value }))
           }
           className="w-full rounded border px-2 py-1"
           rows={3}
@@ -113,10 +122,9 @@ export default function EditEventForm({
           disabled={submitting || !isValid}
           className="px-3 py-1 rounded bg-blue-600 text-white hover:cursor-pointer"
         >
-          {submitting ? "Salvando..." : "Salva"}
+          {submitting ? "Creando..." : "Crea"}
         </button>
       </div>
     </form>
   );
 }
-

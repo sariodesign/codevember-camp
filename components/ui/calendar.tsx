@@ -1,21 +1,47 @@
-'use client';
+"use client";
 
 import { useState, useMemo } from "react";
-import { GoogleCalendarEvent } from "@/utils/mappers/mapGoogleCalendarEvents";
+import { Button } from "./button";
+import { Edit, Trash, CalendarPlus } from "lucide-react";
 
-type CalendarItem = GoogleCalendarEvent;
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./dialog";
+import EditEventForm, { EditEventFormValues } from "../forms/EditEventForm";
+import CreateEventForm from "../forms/CreateEventForm";
+import { toLocalInputDateTime } from "@/utils/date/formatters";
+import { CalendarEvent } from "@/types/event";
+
+type CalendarItem = CalendarEvent;
 
 type CalendarProps = {
   items: CalendarItem[];
+  onDelete: (id: string) => void;
+  deletingId: string | null;
+  editEventFromValues: (
+    event: CalendarItem,
+    values: EditEventFormValues
+  ) => Promise<void>;
+  updatingId: string | null;
+  setUpdatingId?: (id: string | null) => void;
+  createEventFromValues: (
+    values: EditEventFormValues,
+    selectedDate: Date | undefined
+  ) => Promise<void>;
+  creatingId: boolean;
 };
 
 const formatMonthYear = (date: Date) =>
-  date.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+  date.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
 
 const getDateKey = (date: Date): string => {
   const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 };
 
@@ -37,13 +63,25 @@ const createMonthGrid = (month: Date): Date[] => {
   return days;
 };
 
-export default function Calendar({ items }: CalendarProps) {
+export default function Calendar({
+  items,
+  onDelete,
+  deletingId,
+  editEventFromValues,
+  updatingId,
+  createEventFromValues,
+  creatingId,
+}: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
 
-  const [selectedDate, setSelectedDate] = useState<Date | null>(() => new Date());
+  const [isDialogOpen, setIsDialogOpen] = useState<string>("");
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(
+    () => new Date()
+  );
 
   const days = useMemo(() => createMonthGrid(currentMonth), [currentMonth]);
 
@@ -66,21 +104,28 @@ export default function Calendar({ items }: CalendarProps) {
     return map;
   }, [items]);
 
-
   const visibleEvents =
-    selectedKey && eventsByDate.get(selectedKey) ? eventsByDate.get(selectedKey)! : [];
+    selectedKey && eventsByDate.get(selectedKey)
+      ? eventsByDate.get(selectedKey)!
+      : ([] as CalendarItem[]);
 
   const handlePrevMonth = () => {
-    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    setCurrentMonth(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1)
+    );
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+    setCurrentMonth(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
+    );
   };
 
   const handleSelectDate = (date: Date) => {
     setSelectedDate(date);
   };
+
+  console.log("ad");
 
   return (
     <div className="w-full mx-auto rounded-3xl">
@@ -114,7 +159,15 @@ export default function Calendar({ items }: CalendarProps) {
 
         {/* Weekday labels */}
         <div className="grid grid-cols-7 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-500 mb-2">
-          {['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'].map((label) => (
+          {[
+            "Lunedì",
+            "Martedì",
+            "Mercoledì",
+            "Giovedì",
+            "Venerdì",
+            "Sabato",
+            "Domenica",
+          ].map((label) => (
             <div key={label} className="py-1">
               {label}
             </div>
@@ -132,16 +185,15 @@ export default function Calendar({ items }: CalendarProps) {
             const hasEvents = events.length > 0;
 
             const baseClasses =
-              'min-h-[100px] flex flex-col items-center justify-center px-2 text-xs sm:text-sm cursor-pointer transition relative';
-            let colorClasses = '';
+              "min-h-[100px] flex flex-col items-center justify-center px-2 text-xs sm:text-sm cursor-pointer transition relative";
+            let colorClasses = "";
 
             if (isSelected) {
-              colorClasses =
-                'bg-slate-200';
+              colorClasses = "bg-slate-200";
             } else if (!isCurrentMonth) {
-              colorClasses = 'bg-white text-slate-300 hover:bg-slate-50/60';
+              colorClasses = "bg-white text-slate-300 hover:bg-slate-50/60";
             } else {
-              colorClasses = 'bg-white text-slate-700 hover:bg-slate-50';
+              colorClasses = "bg-white text-slate-700 hover:bg-slate-50";
             }
 
             return (
@@ -158,8 +210,8 @@ export default function Calendar({ items }: CalendarProps) {
                     <span
                       className={`mt-1 text-xs font-bold inline-flex items-center justify-center rounded-md px-2 py-2 leading-md ${
                         isSelected
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-blue-200 text-slate-700'
+                          ? "bg-blue-500 text-white"
+                          : "bg-blue-200 text-slate-700"
                       }`}
                     >
                       {events.length === 1
@@ -180,35 +232,141 @@ export default function Calendar({ items }: CalendarProps) {
         {/* Selected day events */}
         <div className="rounded-md bg-slate-50/80 border border-slate-100 p-3 sm:p-4">
           <div className="flex items-baseline justify-between gap-2 mb-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-700">
-              Eventi del giorno
-            </p>
+            <div className="flex items-baseline gap-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-700">
+                Eventi del giorno
+              </p>
+              <Dialog
+                open={isDialogOpen === "new"}
+                onOpenChange={(open) => {
+                  if (open) setIsDialogOpen("new");
+                  else setIsDialogOpen("");
+                }}
+              >
+                <DialogTrigger asChild>
+                  <Button
+                  variant={"outline"}>
+                    <CalendarPlus />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Crea nuovo evento</DialogTitle>
+                  </DialogHeader>
+                  <CreateEventForm
+                    selectedDate={selectedDate ?? undefined}
+                    onSubmit={async (values) => {
+                      try {
+                        setIsDialogOpen("");
+                        await createEventFromValues(
+                          values,
+                          selectedDate ?? undefined
+                        );
+                      } catch (error) {
+                        console.error(
+                          "Errore durante la creazione dell'evento:",
+                          error
+                        );
+                      }
+                    }}
+                    onCancel={() => setIsDialogOpen("")}
+                    submitting={creatingId}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
             {selectedDate && (
               <p className="text-xs text-slate-400">
-                {selectedDate.toLocaleDateString('it-IT', {
-                  weekday: 'short',
-                  day: '2-digit',
-                  month: 'short',
+                {selectedDate.toLocaleDateString("it-IT", {
+                  weekday: "short",
+                  day: "2-digit",
+                  month: "short",
                 })}
               </p>
             )}
           </div>
-
+          <div className="flex justify-end">
+            
+          </div>
           {visibleEvents && visibleEvents.length === 0 ? (
-            <p className="text-xs sm:text-sm text-slate-400"> Nessun evento per questa data. 🍊</p>
+            <p className="text-xs sm:text-sm text-slate-400">
+              {" "}
+              Nessun evento per questa data. 🍊
+            </p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-4">
               {visibleEvents.map((event, idx) => (
                 <li
                   key={event.id + idx}
-                  className="flex items-center cursor-pointer justify-between rounded-xl bg-white px-3 py-2 shadow-sm border border-slate-100"
+                  className="flex items-center cursor-pointer justify-between px-3 py-2 border-b border-slate-200"
                 >
                   <div>
-                    <p className="text-sm font-medium text-slate-900">{event.summary}</p>
+                    <p className="text-sm font-medium text-slate-900">
+                      {event.summary}
+                    </p>
                     {event.location && (
                       <p className="text-xs text-slate-500">{event.location}</p>
                     )}
+                  </div>
+                  <div className="space-x-2">
+                      <Dialog
+                      key={updatingId}
+                      open={event.id === isDialogOpen}
+                      onOpenChange={(open) =>{
+                        if (open) setIsDialogOpen(event.id)
+                        else setIsDialogOpen("");
+                      }}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                        variant={"outline"}>
+                          <Edit />
+                        </Button>
+                      </DialogTrigger>
 
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Modifica evento</DialogTitle>
+                        </DialogHeader>
+
+                        <EditEventForm
+                          initial={{
+                            summary: event.summary || "",
+                            description: event.description || "",
+                            location: event.location || "",
+                            start: toLocalInputDateTime(
+                              event.start?.dateTime || ""
+                            ),
+                            end: toLocalInputDateTime(
+                              event.end?.dateTime || ""
+                            ),
+                          }}
+                          onSubmit={async (values) => {
+                            try {
+                              setIsDialogOpen("");
+                              await editEventFromValues(event, values);
+                            } catch (error) {
+                              console.error(
+                                "Errore durante la modifica dell'evento:",
+                                error
+                              );
+                            }
+                          }}
+                          onCancel={() => setIsDialogOpen("")}
+                          submitting={updatingId === event.id}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                    
+                    <Button
+                      
+                      onClick={() => onDelete(event.id)}
+                      disabled={deletingId === event.id}
+                    >
+                      {deletingId === event.id ? "Eliminando..." : <Trash />}
+                    </Button>
+
+                  
                   </div>
                 </li>
               ))}

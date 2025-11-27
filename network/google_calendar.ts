@@ -50,7 +50,7 @@ async function GETEvents(
  */
 async function INSERTEvent(
   token: string,
-  event: CalendarEvent,
+  event: Partial<CalendarEvent>,
   calendarId: string = GoogleCalendarType.Primary,
   sendUpdates:
     | GoogleCalendarSendUpdates.All
