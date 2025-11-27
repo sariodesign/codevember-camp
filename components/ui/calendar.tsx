@@ -332,7 +332,7 @@ export default function Calendar({
                         <EditEventForm
                           initial={{
                             summary: event.summary || "",
-                            description: event.location || "",
+                            description: event.description || "",
                             start: toLocalInputDateTime(
                               event.start?.dateTime || ""
                             ),
