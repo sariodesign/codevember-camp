@@ -75,4 +75,45 @@ async function INSERTEvent(
   return response;
 }
 
-export { GETEvents, INSERTEvent };
+async function DELETEEvent(
+  token: string,
+  eventId: string,
+  calendarId: string = GoogleCalendarType.Primary
+): Promise<Response> {
+  const url = new URL(
+    `${BASE_CALENDAR_URL}${calendarId}/events/${eventId}`
+);
+
+  const response = await fetch(url.toString(), {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response;
+}
+
+async function PATCHEvent(
+  token: string,
+  eventId: string,
+  updatedEvent: Partial<CalendarEvent>,
+  calendarId: string = GoogleCalendarType.Primary
+): Promise<Response> {
+  const url = new URL(
+    `${BASE_CALENDAR_URL}${calendarId}/events/${eventId}`
+  );
+  const response = await fetch(url.toString(), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedEvent),
+  });
+
+  return response;
+}
+
+export { GETEvents, INSERTEvent, DELETEEvent, PATCHEvent };

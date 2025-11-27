@@ -1,10 +1,34 @@
 "use client";
 
-import { useDashboard } from "@/hooks/dashboard/useDashboard";
 import { Calendar } from "@/components/ui/calendar-shadcn";
+import EditEventForm from "@/components/forms/EditEventForm";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useDashboard } from "@/hooks/dashboard/useDashboard";
+import { toLocalInputDateTime } from "@/utils/date/formatters";
+import { Trash } from "lucide-react";
+import { Edit } from "lucide-react";
 
 export default function Dashboard() {
-  const { date, eventsForSelectedDate, setDate, loading, hasEvents } = useDashboard()
+  const {
+    date,
+    eventsForSelectedDate,
+    setDate,
+    loading,
+    hasEvents,
+    handleDelete,
+    deletingId,
+    updatingId,
+    isDialogOpen,
+    setIsDialogOpen,
+    editEventFromValues,
+  } = useDashboard();
 
   console.log("Rendering Dashboard with date:", hasEvents);
 
@@ -22,7 +46,7 @@ export default function Dashboard() {
             selected={date}
             onSelect={setDate}
             modifiers={{
-              hasEvents
+              hasEvents,
             }}
             modifiersClassNames={{
               hasEvents:
@@ -46,6 +70,55 @@ export default function Dashboard() {
                 >
                   <h3 className="font-semibold">{event.summary}</h3>
                   <p className="text-sm text-gray-600">{event.description}</p>
+
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      variant={"outline"}
+                      onClick={() => event.id && handleDelete(event.id)}
+                      disabled={deletingId === event.id}
+                    >
+                      {deletingId === event.id ? "Eliminando..." : <Trash />}
+                    </Button>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Edit />
+                        </Button>
+                      </DialogTrigger>
+
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Modifica evento</DialogTitle>
+                        </DialogHeader>
+
+                        <EditEventForm
+                          initial={{
+                            summary: event.summary || "",
+                            description: event.description || "",
+                            start: toLocalInputDateTime(
+                              event.start?.dateTime || ""
+                            ),
+                            end: toLocalInputDateTime(
+                              event.end?.dateTime || ""
+                            ),
+                          }}
+                          onSubmit={async (values) => {
+                            try {
+                              await editEventFromValues(event, values);
+                              setIsDialogOpen(false);
+                            } catch (error) {
+                              console.error(
+                                "Errore durante la modifica dell'evento:",
+                                error
+                              );
+                            }
+                          }}
+                          onCancel={() => setIsDialogOpen(false)}
+                          submitting={updatingId === event.id}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
               ))
             ) : (
