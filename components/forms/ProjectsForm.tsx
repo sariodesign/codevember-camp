@@ -125,9 +125,12 @@ export const ProjectsForm = ({ form, onSubmit }: Props) => {
                               <SelectValue placeholder="Seleziona la priorità" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="alta">Alta</SelectItem>
-                              <SelectItem value="media">Media</SelectItem>
-                              <SelectItem value="bassa">Bassa</SelectItem>
+                              {/** 
+                               // TODO:  Lasciare così per ora, più avanti si possono gestire i valori con un enum
+                               */}
+                              <SelectItem value={`${1}`}>Alta</SelectItem>
+                              <SelectItem value={`${2}`}>Media</SelectItem>
+                              <SelectItem value={`${3}`}>Bassa</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

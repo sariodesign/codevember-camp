@@ -68,10 +68,14 @@ export const FocusTimeForm = ({ form, onSubmit }: Props) => (
                       <SelectValue placeholder="Seleziona un momento" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="mattina">Mattina</SelectItem>
-                      <SelectItem value="pomeriggio">Pomeriggio</SelectItem>
-                      <SelectItem value="sera">Sera</SelectItem>
-                      <SelectItem value="notte">Notte</SelectItem>
+                      {/** 
+                       // TODO:  Lasciare così per ora, più avanti si possono gestire i valori con un enum
+                       */}
+
+                      <SelectItem value="9:00-13:00">Mattina</SelectItem>
+                      <SelectItem value="14:00-18:00">Pomeriggio</SelectItem>
+                      <SelectItem value="19:00-23:00">Sera</SelectItem>
+                      <SelectItem value="23:00-08:00">Notte</SelectItem>
                     </SelectContent>
                   </Select>
                   <Error field={field} />

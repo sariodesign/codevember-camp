@@ -23,3 +23,23 @@ export async function findUserPreferencesByUserId(
 
   return data;
 }
+
+export async function updateUserPreferences(
+  supabase: SupabaseClient<Database>,
+  {
+    userId,
+    preferences
+  }: {
+    userId: string,
+    preferences: Partial<UserPreferences>
+  }) {
+  const { data, error } = await supabase.from('user_preferences').update({
+    ...preferences,
+    updated_at: new Date().toISOString(),
+  }).eq('user_id', userId)
+    .select()
+    .single()
+
+  if (error) throw error;
+  return data;
+}

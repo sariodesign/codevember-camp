@@ -12,18 +12,18 @@ export const focusTimeFormSchema = z.object({
     sessionsBeforeBreak: z.string().min(1, "Seleziona il numero di sessioni prima della pausa"),
 })
 
-export const pojectsFormSchema = z.object({
+export const projectsFormSchema = z.object({
     numberOfProjects: z.number().min(1, "Aggiungere almeno un progetto"),
     projects: z.array(projectSchema),
 })
 
 export const onboardingSchema = z.object({
     focusTime: focusTimeFormSchema,
-    projects: pojectsFormSchema,
+    projects: projectsFormSchema,
 });
 
 
 export type Project = z.infer<typeof projectSchema>
 export type Onboarding = z.infer<typeof onboardingSchema>;
-export type ProjectForm = z.infer<typeof pojectsFormSchema>;
+export type ProjectForm = z.infer<typeof projectsFormSchema>;
 export type FocusTimeForm = z.infer<typeof focusTimeFormSchema>;
