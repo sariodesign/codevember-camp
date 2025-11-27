@@ -234,7 +234,7 @@ export default function Calendar({
           <div className="flex items-baseline justify-between gap-2 mb-2">
             <div className="flex items-baseline gap-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-700">
-                Eventi del giorno:
+                Eventi del giorno
               </p>
               <Dialog
                 open={isDialogOpen === "new"}
