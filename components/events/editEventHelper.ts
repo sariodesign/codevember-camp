@@ -10,7 +10,7 @@ export function buildEventFromValues(
     description: values.description || "",
   };
 
-  if(values.location) {
+  if (values.location) {
     newEvent.location = values.location;
   }
 

@@ -67,7 +67,15 @@ export const useCalendar = () => {
     const ref = referenceMonth ?? new Date();
 
     // start = first day of previous month at 00:00
-    const start = new Date(ref.getFullYear(), ref.getMonth() - 1, 1, 0, 0, 0, 0);
+    const start = new Date(
+      ref.getFullYear(),
+      ref.getMonth() - 1,
+      1,
+      0,
+      0,
+      0,
+      0
+    );
 
     // end = first day of the month after next (exclusive boundary)
     const end = new Date(ref.getFullYear(), ref.getMonth() + 2, 1, 0, 0, 0, 0);
@@ -107,7 +115,6 @@ export const useCalendar = () => {
     } finally {
       setLoading(false);
     }
-    
   }, []);
 
   useEffect(() => {
@@ -123,12 +130,18 @@ export const useCalendar = () => {
     };
 
     if (typeof window !== "undefined") {
-      window.addEventListener("calendar:updated", onCalendarUpdated as EventListener);
+      window.addEventListener(
+        "calendar:updated",
+        onCalendarUpdated as EventListener
+      );
     }
 
     return () => {
       if (typeof window !== "undefined") {
-        window.removeEventListener("calendar:updated", onCalendarUpdated as EventListener);
+        window.removeEventListener(
+          "calendar:updated",
+          onCalendarUpdated as EventListener
+        );
       }
     };
   }, [fetchEvents]);
