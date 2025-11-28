@@ -14,9 +14,9 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function Header({ 
-  user 
-}: { 
+export default function Header({
+  user
+}: {
   user: any;
 }) {
   const [open, setOpen] = useState(false);
@@ -26,7 +26,7 @@ export default function Header({
   return (
     <header className="w-full border-b border-stone-200 flex justify-between items-center p-4">
       <div>
-        <h1 className="text-xl font-bold">Nome App</h1>
+        <h1 className="text-xl font-bold">Time Waster Pro</h1>
       </div>
 
       <div>

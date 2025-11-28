@@ -139,8 +139,6 @@ export default function Calendar({
     }
   }, [currentMonth]);
 
-  console.log("ad");
-
   return (
     <div className="w-full mx-auto rounded-3xl">
       <div className="rounded-3xl bg-white/80 backdrop-blur-sm">
@@ -222,11 +220,10 @@ export default function Calendar({
                 {hasEvents && (
                   <div className="flex flex-col">
                     <div
-                      className={`flex flex-col mt-1 text-xs font-bold items-center justify-center rounded-md px-2 py-2 leading-md ${
-                        isSelected
+                      className={`flex flex-col mt-1 text-xs font-bold items-center justify-center rounded-md px-2 py-2 leading-md ${isSelected
                           ? "bg-blue-500 text-white"
                           : "bg-blue-200 text-slate-700"
-                      }`}
+                        }`}
                     >
                       <span>
                         {events.length === 1
@@ -334,19 +331,19 @@ export default function Calendar({
                     <p className="text-xs text-slate-400">
                       {event.start?.dateTime
                         ? new Date(event.start.dateTime).toLocaleString(
-                            "it-IT",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )
+                          "it-IT",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )
                         : ""}{" "}
                       -{" "}
                       {event.end?.dateTime
                         ? new Date(event.end.dateTime).toLocaleString("it-IT", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
                         : ""}
                     </p>
                   </div>
@@ -400,7 +397,7 @@ export default function Calendar({
                     </Dialog>
 
                     <Button
-                      variant={"destructive"}
+                      variant={"alert"}
                       onClick={() => onDelete(event.id)}
                       disabled={deletingId === event.id}
                     >

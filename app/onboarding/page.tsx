@@ -29,13 +29,11 @@ export default function Onboarding() {
         setTimeout(() => setCurrentStep(2), 1000)
         return "Focus time step submitted successfully";
       } else {
-        console.log(data.error)
-        throw new Error("");
+        throw new Error(data.error);
       }
     })
       .catch((err) => {
         console.error(err);
-        throw err;
       }),
       {
         loading: 'Submitting focus time...',
@@ -54,13 +52,11 @@ export default function Onboarding() {
         }, 1000)
         return "Projects step submitted successfully";
       } else {
-        console.log(data.error)
-        throw new Error("");
+        throw new Error(data.error);
       }
     })
       .catch((err) => {
         console.error(err);
-        throw err;
       }),
       {
         loading: 'Submitting projects...',

@@ -35,7 +35,7 @@ export function SignupForm() {
     <Card className="w-full max-w-md m-auto">
       <CardHeader>
         <CardTitle>
-          Benvenuto in <strong>Nome App</strong>
+          Benvenuto in <strong>Time Waster Pro</strong>
         </CardTitle>
         <CardDescription>
           Inserisci una email e una password per creare un account.

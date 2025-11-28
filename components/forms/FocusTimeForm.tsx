@@ -100,29 +100,25 @@ export const FocusTimeForm = ({ form, onSubmit }: Props) => (
                     <RadioGroupListItem value={25}>25 min</RadioGroupListItem>
                     <RadioGroupListItem value={50}>50 min</RadioGroupListItem>
                     <RadioGroupListItem value={90}>90 min</RadioGroupListItem>
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="custom" id="custom" />
-                      <Input
-                        type="number"
-                        placeholder="Inserisci la durata"
-                        value={
-                          field.state.value &&
-                            !["25", "50", "90", "custom"].includes(
-                              field.state.value
-                            )
-                            ? field.state.value
-                            : ""
-                        }
-                        onChange={(e) => {
-                          field.handleChange(e.target.value);
-                        }}
-                        disabled={
-                          !field.state.value ||
-                          ["25", "50", "90"].includes(field.state.value)
-                        }
-                      />
-                    </div>
                   </RadioGroup>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="custom"
+                      type="number"
+                      placeholder="Inserisci la durata"
+                      value={
+                        field.state.value &&
+                          !["25", "50", "90", "custom"].includes(
+                            field.state.value
+                          )
+                          ? field.state.value
+                          : ""
+                      }
+                      onChange={(e) => {
+                        field.handleChange(e.target.value);
+                      }}
+                    />
+                  </div>
                   <Error field={field} />
                 </div>
               );
