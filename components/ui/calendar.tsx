@@ -305,8 +305,22 @@ export default function Calendar({
                       {event.summary}
                     </p>
                     {event.location && (
-                      <p className="text-xs text-slate-500">{event.location}</p>
+                      <p className="text-xs text-slate-600">{event.location}</p>
                     )}
+                    <p className="text-xs text-slate-400">
+                      {event.start?.dateTime
+                        ? new Date(event.start.dateTime).toLocaleString("it-IT", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : ''}{" "}-{" "}
+                      {event.end?.dateTime
+                        ? new Date(event.end.dateTime).toLocaleString("it-IT", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : ''}
+                    </p>
                   </div>
                   <div className="space-x-2">
                       <Dialog
