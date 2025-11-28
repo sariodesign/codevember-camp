@@ -1,7 +1,4 @@
 "use client";
-import React from "react";
-import { useForm } from "@tanstack/react-form";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -11,33 +8,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "../ui/button";
-import { login } from "@/app/actions/login";
-import Link from "next/dist/client/link";
-import { Label } from "../ui/label";
 import { GoogleIcon } from "../icons/GoogleIcon";
 import { createClient } from "@/utils/supabase/client";
 
 export default function LoginForm() {
   const supabase = createClient();
 
-  const form = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-    onSubmit: async ({ value }) => {
-      const formData = new FormData();
-      formData.append("email", value.email);
-      formData.append("password", value.password);
-      await login(formData);
-    },
-  });
-
   return (
     <Card className="w-full max-w-md m-auto">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">
-          Benvenuto in <strong>Nome App</strong>
+          Benvenuto in <strong>Time Waster Pro</strong>
         </CardTitle>
         <CardDescription>
           Accedi con il tuo account Google per continuare.
