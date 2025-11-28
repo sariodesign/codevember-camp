@@ -16,6 +16,7 @@ import {
 } from "@/utils/mappers/mapGoogleCalendarEvents";
 import { createClient } from "@/utils/supabase/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 export const useCalendar = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -55,8 +56,10 @@ export const useCalendar = () => {
       if (!res.ok) {
         throw new Error("Errore durante l'eliminazione dell'evento.");
       }
+      toast.success("Event deleted successfully!");
       await fetchEvents();
     } catch (error) {
+      toast.error("Failed to delete event.");
       console.error("Errore durante l'eliminazione dell'evento:", error);
       alert("Si è verificato un errore durante l'eliminazione dell'evento.");
     } finally {
@@ -98,21 +101,21 @@ export const useCalendar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-    useEffect(() => {
-      const onCalendarUpdated = () => {
-        fetchEvents();
-      };
+  useEffect(() => {
+    const onCalendarUpdated = () => {
+      fetchEvents();
+    };
 
+    if (typeof window !== "undefined") {
+      window.addEventListener("calendar:updated", onCalendarUpdated);
+    }
+
+    return () => {
       if (typeof window !== "undefined") {
-        window.addEventListener("calendar:updated", onCalendarUpdated);
+        window.removeEventListener("calendar:updated", onCalendarUpdated);
       }
-
-      return () => {
-        if (typeof window !== "undefined") {
-          window.removeEventListener("calendar:updated", onCalendarUpdated);
-        }
-      };
-    }, [fetchEvents]);
+    };
+  }, [fetchEvents]);
 
   const eventsForSelectedDate = useMemo(() => {
     return events.filter((event) => {
@@ -148,14 +151,19 @@ export const useCalendar = () => {
         const text = await res.text().catch(() => "Errore server");
         throw new Error(text || `HTTP ${res.status}`);
       }
+      toast.success("Event updated successfully!");
       await fetchEvents();
+    } catch (error) {
+      toast.error("Failed to update event.");
     } finally {
       setUpdatingId(null);
     }
   };
 
   const createEventFromValues = async (
-values: EditEventFormValues, selectedDate: Date  ) => {
+    values: EditEventFormValues,
+    selectedDate: Date
+  ) => {
     const newEvent = buildEventFromValues(values);
 
     try {
@@ -167,8 +175,11 @@ values: EditEventFormValues, selectedDate: Date  ) => {
         const text = await res.text().catch(() => "Errore server");
         throw new Error(text || `HTTP ${res.status}`);
       }
+
+      toast.success("Event created successfully!");
       await fetchEvents();
     } catch (error) {
+      toast.error("Failed to create event.");
       console.error("Errore durante la creazione dell'evento:", error);
       alert("Si è verificato un errore durante la creazione dell'evento.");
     } finally {
