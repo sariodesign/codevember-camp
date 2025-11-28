@@ -79,6 +79,18 @@ export default function CreateEventForm({
         />
       </div>
 
+      <div>
+        <label className="block text-sm">Location</label>
+        <textarea
+          value={values.location ?? ""}
+          onChange={(e) =>
+            setValues((s) => ({ ...s, location: e.target.value }))
+          }
+          className="w-full rounded border px-2 py-1"
+          rows={3}
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="block text-sm">Inizio</label>

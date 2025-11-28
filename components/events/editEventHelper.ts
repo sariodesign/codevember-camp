@@ -8,6 +8,10 @@ values: EditEventFormValues): Partial<CalendarEvent> {
     description: values.description || "",
   };
 
+  if(values.location) {
+    newEvent.location = values.location;
+  }
+
   if (values.start) {
     newEvent.start = { dateTime: new Date(values.start).toISOString() };
   }
