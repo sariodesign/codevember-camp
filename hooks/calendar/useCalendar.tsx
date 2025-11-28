@@ -26,12 +26,7 @@ export const useCalendar = () => {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [creatingId, setCreatingId] = useState<boolean>(false);
 
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-
-  const endOfMonth = new Date(startOfMonth);
-  endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+  // Range is calculated dynamically inside fetchEvents (we fetch referenceMonth -1 .. +1)
 
   const getUserToken = async () => {
     const supabase = createClient();
@@ -67,52 +62,86 @@ export const useCalendar = () => {
     }
   };
 
-  const fetchEvents = useCallback(async () => {
-    const params = new URLSearchParams({
-      timeMin: startOfMonth.toISOString(),
-      timeMax: endOfMonth.toISOString(),
-      singleEvents: "true",
-      orderBy: "startTime",
-    });
+  const fetchEvents = useCallback(async (referenceMonth?: Date) => {
+    // if no month provided, use current date as reference
+    const ref = referenceMonth ?? new Date();
+
+    // start = first day of previous month at 00:00
+    const start = new Date(
+      ref.getFullYear(),
+      ref.getMonth() - 1,
+      1,
+      0,
+      0,
+      0,
+      0
+    );
+
+    // end = first day of the month after next (exclusive boundary)
+    const end = new Date(ref.getFullYear(), ref.getMonth() + 2, 1, 0, 0, 0, 0);
+
+    const allItems: GoogleCalendarEvent[] = [];
+    let pageToken: string | undefined = undefined;
 
     try {
       const token = await getUserToken();
-      if (token) {
-        const calendarEvents = await GETEvents(token, params)
-          .then((response) => response.json())
-          .then(
-            ({ items }: { items: GoogleCalendarEvent[] }): CalendarEvent[] => {
-              const data = mapGoogleCalendarEvents(items);
-              return data;
-            }
-          );
-        setEvents(calendarEvents || []);
-      }
+      if (!token) return setEvents([]);
+
+      do {
+        const params = new URLSearchParams({
+          timeMin: start.toISOString(),
+          timeMax: end.toISOString(),
+          singleEvents: "true",
+          orderBy: "startTime",
+          maxResults: "2500",
+        });
+        if (pageToken) params.set("pageToken", pageToken);
+
+        const res = await GETEvents(token, params);
+        if (!res.ok) {
+          const text = await res.text().catch(() => "Errore server");
+          throw new Error(text || `HTTP ${res.status}`);
+        }
+
+        const json = await res.json();
+        allItems.push(...(json.items ?? []));
+        pageToken = json.nextPageToken;
+      } while (pageToken);
+
+      const calendarEvents = mapGoogleCalendarEvents(allItems);
+      setEvents(calendarEvents || []);
     } catch (error) {
       console.error("Errore nel recupero degli eventi del calendario:", error);
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fetchEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchEvents]);
 
   useEffect(() => {
-    const onCalendarUpdated = () => {
-      fetchEvents();
+    const onCalendarUpdated = (ev: Event) => {
+      const detail = (ev as CustomEvent)?.detail;
+      const monthIso = detail?.month as string | undefined;
+      const month = monthIso ? new Date(monthIso) : undefined;
+      fetchEvents(month);
     };
 
     if (typeof window !== "undefined") {
-      window.addEventListener("calendar:updated", onCalendarUpdated);
+      window.addEventListener(
+        "calendar:updated",
+        onCalendarUpdated as EventListener
+      );
     }
 
     return () => {
       if (typeof window !== "undefined") {
-        window.removeEventListener("calendar:updated", onCalendarUpdated);
+        window.removeEventListener(
+          "calendar:updated",
+          onCalendarUpdated as EventListener
+        );
       }
     };
   }, [fetchEvents]);
@@ -153,7 +182,7 @@ export const useCalendar = () => {
       }
       toast.success("Event updated successfully!");
       await fetchEvents();
-    } catch (error) {
+    } catch {
       toast.error("Failed to update event.");
     } finally {
       setUpdatingId(null);
@@ -162,9 +191,9 @@ export const useCalendar = () => {
 
   const createEventFromValues = async (
     values: EditEventFormValues,
-    selectedDate: Date
+    _selectedDate?: Date
   ) => {
-    const newEvent = buildEventFromValues(values);
+    const newEvent = buildEventFromValues(values, _selectedDate);
 
     try {
       setCreatingId(true);

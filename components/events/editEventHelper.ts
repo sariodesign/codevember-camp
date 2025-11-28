@@ -2,22 +2,32 @@ import type { CalendarEvent } from "@/types/event";
 import type { EditEventFormValues } from "@/components/forms/EditEventForm";
 
 export function buildEventFromValues(
-values: EditEventFormValues): Partial<CalendarEvent> {
+  values: EditEventFormValues,
+  selectedDate?: Date
+): Partial<CalendarEvent> {
   const newEvent: Partial<CalendarEvent> = {
     summary: values.summary || "Senza titolo",
     description: values.description || "",
   };
 
-  if(values.location) {
+  if (values.location) {
     newEvent.location = values.location;
   }
 
   if (values.start) {
     newEvent.start = { dateTime: new Date(values.start).toISOString() };
+  } else if (selectedDate) {
+    const s = new Date(selectedDate);
+    s.setHours(10, 0, 0, 0);
+    newEvent.start = { dateTime: s.toISOString() };
   }
 
   if (values.end) {
     newEvent.end = { dateTime: new Date(values.end).toISOString() };
+  } else if (selectedDate) {
+    const e = new Date(selectedDate);
+    e.setHours(11, 0, 0, 0);
+    newEvent.end = { dateTime: e.toISOString() };
   }
 
   return newEvent;
