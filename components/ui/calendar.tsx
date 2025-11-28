@@ -216,7 +216,7 @@ export default function Calendar({
                       <span>
                         {events.length === 1 ? `${events[0].summary}` : `${events.length} eventi`}
                       </span>
-                      {events.length === 1 && events[0].start?.dateTime && (
+                      {events.length === 1 && events[0].start?.dateTime && events[0].end?.dateTime && (
                         <span className="font-normal text-xs">
                           {`${new Date(events[0].start.dateTime).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`} - {`${new Date(events[0].end.dateTime).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`}
                         </span>
