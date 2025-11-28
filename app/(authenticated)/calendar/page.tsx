@@ -13,6 +13,7 @@ export default function CalendarPage() {
     updatingId,
     createEventFromValues,
     creatingId,
+    loading
   } = useCalendar();
 
   const handleCreateEvent = async (
@@ -25,16 +26,26 @@ export default function CalendarPage() {
 
   return (
     <section className="max-w-6xl mx-auto space-y-6 p-8">
-      {events && events.length === 0 && <p>Nessun evento trovato.</p>}
-      <Calendar
-        items={events}
-        onDelete={handleDelete}
-        deletingId={deletingId}
-        editEventFromValues={editEventFromValues}
-        updatingId={updatingId}
-        createEventFromValues={handleCreateEvent}
-        creatingId={creatingId}
-      />
+      {loading ? (
+        <p>Caricamento eventi...</p>
+      ) : (
+        <>
+          {events && events.length > 0 ? (
+            <Calendar
+              items={events}
+              onDelete={handleDelete}
+              deletingId={deletingId}
+              editEventFromValues={editEventFromValues}
+              updatingId={updatingId}
+              createEventFromValues={handleCreateEvent}
+              creatingId={creatingId}
+            />
+          ) : (
+            <p>Nessun evento trovato.</p>
+          )}
+        </>
+      )}  
+      
     </section>
   );
 }

@@ -11,6 +11,13 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar"
 
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Profilo',
+  description: 'Pagina profilo dell\'utente',
+};
+
 export default async function ProfilePage() {
   const supabase = await createClient();
   const currentUser = await findProfileById(supabase, (await getCurrentUser()).data.user?.id || "");

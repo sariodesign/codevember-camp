@@ -207,22 +207,26 @@ export default function Calendar({
 
                 {hasEvents && (
                   <div className="flex flex-col">
-                    <span
-                      className={`mt-1 text-xs font-bold inline-flex items-center justify-center rounded-md px-2 py-2 leading-md ${
-                        isSelected
-                          ? "bg-blue-500 text-white"
-                          : "bg-blue-200 text-slate-700"
-                      }`}
-                    >
-                      {events.length === 1
-                        ? events[0].summary
-                        : `${events.length} eventi`}
-                    </span>
+                    <div className={`flex flex-col mt-1 text-xs font-bold items-center justify-center rounded-md px-2 py-2 leading-md ${
+                          isSelected
+                            ? "bg-blue-500 text-white"
+                            : "bg-blue-200 text-slate-700"
+                        }`}>
+
+                      <span>
+                        {events.length === 1 ? `${events[0].summary}` : `${events.length} eventi`}
+                      </span>
+                      {events.length === 1 && events[0].start?.dateTime && events[0].end?.dateTime && (
+                        <span className="font-normal text-xs">
+                          {`${new Date(events[0].start.dateTime).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`} - {`${new Date(events[0].end.dateTime).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
 
                 {isToday && (
-                  <span className="absolute -top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-400 border border-white" />
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-400 border border-white" />
                 )}
               </button>
             );
@@ -232,11 +236,12 @@ export default function Calendar({
         {/* Selected day events */}
         <div className="rounded-md bg-slate-50/80 border border-slate-100 p-3 sm:p-4">
           <div className="flex items-baseline justify-between gap-2 mb-2">
-            <div className="flex items-baseline gap-4">
+            <div className="flex justify-between items-baseline gap-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-700">
                 Eventi del giorno
               </p>
-              <Dialog
+            </div>
+            <Dialog
                 open={isDialogOpen === "new"}
                 onOpenChange={(open) => {
                   if (open) setIsDialogOpen("new");
@@ -244,9 +249,9 @@ export default function Calendar({
                 }}
               >
                 <DialogTrigger asChild>
-                  <Button
-                  variant={"outline"}>
+                  <Button variant={"outline"}>
                     <CalendarPlus />
+                    <span>Aggiungi evento</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
@@ -274,16 +279,6 @@ export default function Calendar({
                   />
                 </DialogContent>
               </Dialog>
-            </div>
-            {selectedDate && (
-              <p className="text-xs text-slate-400">
-                {selectedDate.toLocaleDateString("it-IT", {
-                  weekday: "short",
-                  day: "2-digit",
-                  month: "short",
-                })}
-              </p>
-            )}
           </div>
           <div className="flex justify-end">
             
@@ -305,11 +300,25 @@ export default function Calendar({
                       {event.summary}
                     </p>
                     {event.location && (
-                      <p className="text-xs text-slate-500">{event.location}</p>
+                      <p className="text-xs text-slate-600">{event.location}</p>
                     )}
+                    <p className="text-xs text-slate-400">
+                      {event.start?.dateTime
+                        ? new Date(event.start.dateTime).toLocaleString("it-IT", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : ''}{" "}-{" "}
+                      {event.end?.dateTime
+                        ? new Date(event.end.dateTime).toLocaleString("it-IT", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : ''}
+                    </p>
                   </div>
                   <div className="space-x-2">
-                      <Dialog
+                    <Dialog
                       key={updatingId}
                       open={event.id === isDialogOpen}
                       onOpenChange={(open) =>{
@@ -318,8 +327,7 @@ export default function Calendar({
                       }}
                     >
                       <DialogTrigger asChild>
-                        <Button
-                        variant={"outline"}>
+                        <Button variant={"secondary"}>
                           <Edit />
                         </Button>
                       </DialogTrigger>
@@ -359,7 +367,7 @@ export default function Calendar({
                     </Dialog>
                     
                     <Button
-                      
+                      variant={"destructive"}
                       onClick={() => onDelete(event.id)}
                       disabled={deletingId === event.id}
                     >
