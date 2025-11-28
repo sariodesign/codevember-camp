@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "./button";
 import { Edit, Trash, CalendarPlus } from "lucide-react";
 
@@ -124,6 +124,20 @@ export default function Calendar({
   const handleSelectDate = (date: Date) => {
     setSelectedDate(date);
   };
+
+  // Notify listeners (e.g. useCalendar hook) when the visible month changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.dispatchEvent(
+        new CustomEvent("calendar:updated", {
+          detail: { month: currentMonth.toISOString() },
+        })
+      );
+    } catch {
+      // ignore
+    }
+  }, [currentMonth]);
 
   console.log("ad");
 
