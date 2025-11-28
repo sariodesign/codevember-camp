@@ -52,7 +52,6 @@ export async function submitProjectsStep(
     const { data: userData } = await getCurrentUser()
     const userId = userData.user?.id
     try {
-        console.log(formData)
         const validatedData = projectsFormSchema.parse(formData);
 
         const databaseData = mapProjectsToDatabase(validatedData.projects);
