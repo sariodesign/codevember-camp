@@ -64,7 +64,7 @@ export default function Chat() {
           scrollbar-width: none;
         }
       `}</style>
-      <div className="flex h-screen w-full max-w-3xl flex-col gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:mx-auto">
+      <div className="flex h-screen w-full max-w-3xl flex-col gap-4 bg-slate-50 p-6 pt-16 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:mx-auto">
         <header className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
